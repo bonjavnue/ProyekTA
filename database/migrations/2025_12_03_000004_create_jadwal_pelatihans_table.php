@@ -21,6 +21,9 @@ return new class extends Migration
             $table->dateTime('tenggat_presensi');
             $table->string('link_presensi')->nullable();
             $table->string('qr_code')->nullable();
+            $table->dateTime('waktu_mulai_presensi')->nullable();
+            $table->dateTime('waktu_berakhir_presensi')->nullable();
+            $table->enum('status', ['draft', 'published', 'selesai'])->default('draft');
             $table->text('catatan')->nullable();
             $table->foreign('id_jenis')->references('id_jenis')->on('jenis_pelatihan')->onDelete('cascade');
             $table->timestamps();

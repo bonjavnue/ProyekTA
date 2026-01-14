@@ -8,7 +8,7 @@ class JadwalPelatihan extends Model
 {
     use HasFactory;
     protected $table = 'jadwal_pelatihans';
-    protected $primariKey = 'id_jadwal';
+    protected $primaryKey = 'id_jadwal';
     public $incrementing = true;
     protected $keyType = 'int';
 
@@ -22,15 +22,19 @@ class JadwalPelatihan extends Model
         'tenggat_presensi',
         'link_presensi',
         'qr_code',
+        'waktu_mulai_presensi',
+        'waktu_berakhir_presensi',
         'status',
         'catatan',
     ];
 
     protected $casts = [
         'tanggal_pelaksanaan' => 'date',
-        'jam_mulai' => 'datetime',
-        'jam_selesai' => 'datetime',
+        'jam_mulai' => 'datetime:H:i',
+        'jam_selesai' => 'datetime:H:i',
         'tenggat_presensi' => 'datetime',
+        'waktu_mulai_presensi' => 'datetime',
+        'waktu_berakhir_presensi' => 'datetime',
     ];
 
     //Relationships
@@ -44,7 +48,7 @@ class JadwalPelatihan extends Model
         return $this->hasMany(JadwalBagian::class, 'id_jadwal', 'id_jadwal');
     }
 
-    public function presensiPelatihan()
+    public function PresensiPelatihan()
     {
         return $this->hasMany(PresensiPelatihan::class, 'id_jadwal', 'id_jadwal');
     }

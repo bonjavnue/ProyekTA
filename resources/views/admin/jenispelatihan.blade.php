@@ -111,7 +111,8 @@
                     @empty
                     <tr>
                         <td colspan="5" class="p-8 text-center text-gray-500">
-                            Tidak ada data jenis pelatihan. <a href="#" onclick="openModal()" class="text-brand-blue hover:underline">Tambah data baru</a>
+                            Tidak ada data jenis pelatihan
+                            <!-- <a href="#" onclick="openModal()" class="text-brand-blue hover:underline">Tambah data baru</a> -->
                         </td>
                     </tr>
                     @endforelse
@@ -306,7 +307,7 @@
                 const perPage = new URL(window.location).searchParams.get('per_page') || '10';
                 
                 // Fetch data dengan AJAX
-                const url = new URL('/jenispelatihan', window.location.origin);
+                const url = new URL('/admin/jenispelatihan', window.location.origin);
                 
                 // Jika search kosong, hapus parameter search
                 if (searchQuery) {
@@ -475,7 +476,7 @@
                     const perPage = new URL(window.location).searchParams.get('per_page') || '10';
                     const searchQuery = document.getElementById('searchInput').value.trim();
                     
-                    const url = new URL('/jenispelatihan', window.location.origin);
+                    const url = new URL('/admin/jenispelatihan', window.location.origin);
                     url.searchParams.set('per_page', 999999); // Get semua data
                     
                     if (searchQuery) {
@@ -590,7 +591,7 @@
                     formData.append('_token', csrfToken);
                 }
                 
-                await fetch(`/jenispelatihan/${id}/delete`, {
+                await fetch(`/admin/jenispelatihan/${id}/delete`, {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -618,7 +619,7 @@
         const formData = new FormData(form);
 
         try {
-            const response = await fetch('/jenispelatihan/store', {
+            const response = await fetch('/admin/jenispelatihan/store', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -759,7 +760,7 @@
         const formData = new FormData(editForm);
 
         try {
-            const response = await fetch(`/jenispelatihan/${idJenis}/update`, {
+            const response = await fetch(`/admin/jenispelatihan/${idJenis}/update`, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -878,7 +879,7 @@
                 formData.append('_token', csrfToken);
             }
             
-            const response = await fetch(`/jenispelatihan/${deleteIdJenis}/delete`, {
+            const response = await fetch(`/admin/jenispelatihan/${deleteIdJenis}/delete`, {
                 method: 'POST',
                 body: formData,
                 headers: {

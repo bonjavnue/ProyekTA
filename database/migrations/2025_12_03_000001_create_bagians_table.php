@@ -9,11 +9,11 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // Membuat tabel bagian dengan primary key custom
+    // Membuat tabel bagian dengan auto-increment primary key
     public function up(): void
     {
         Schema::create('bagian', function (Blueprint $table) {
-            $table->integer('id_bagian')->primary();
+            $table->id('id_bagian');
             $table->string('nama_bagian');
             $table->string('email')->unique();
             $table->foreign('email')->references('email')->on('users')->onDelete('cascade');

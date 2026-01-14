@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class JadwalBagian extends Model
 {
     use HasFactory;
-    protected $table = 'jadwal_bagian';
+    protected $table = 'jadwal_bagians';
     protected $primaryKey = 'id_jadwalBagian';
     public $incrementing = true;
     protected $keyType = 'int';

@@ -8,7 +8,7 @@ class PresensiPelatihan extends Model
 {
     use HasFactory;
 
-    protected $table = 'presensi_pelatihan';
+    protected $table = 'presensi_pelatihans';
     protected $primaryKey = 'id_presensi';
     public $incrementing = true;
     protected $keyType = 'int';

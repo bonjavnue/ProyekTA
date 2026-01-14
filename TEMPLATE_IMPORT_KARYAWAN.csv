@@ -1,0 +1,6 @@
+id_karyawan,nik,nama_karyawan,id_bagian,status_karyawan,no_telepon
+1,3171051203980001,John Doe,1,Tetap,081234567890
+2,3171051203980002,Jane Smith,2,Kontrak,081234567891
+3,3171051203980003,Ahmad Rahman,1,Tetap,081234567892
+4,3171051203980004,Siti Nurhaliza,3,Tetap,081234567893
+5,3171051203980005,Budi Santoso,2,Cuti,081234567894

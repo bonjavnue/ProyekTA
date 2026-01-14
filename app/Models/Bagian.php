@@ -11,19 +11,18 @@ class Bagian extends Model
 
     protected $table = 'bagian';
     protected $primaryKey = 'id_bagian';
-    public $incrementing = false;
+    public $incrementing = true;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_bagian',
         'nama_bagian',
         'email',
     ];
 
     //Relationships
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class, 'email', 'email');
+        return $this->belongsToMany(User::class, 'user_bagian', 'bagian_id', 'user_id');
     }
 
     public function karyawan()

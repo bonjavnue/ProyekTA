@@ -14,11 +14,12 @@ return new class extends Migration
     {
         Schema::create('karyawans', function (Blueprint $table) {
             $table->id('id_karyawan');
+            $table->string('nik')->unique();
             $table->string('nama_karyawan');
-            $table->integer('id_bagian');
+            $table->bigInteger('id_bagian')->unsigned();
             $table->string('status_karyawan');
             $table->string('no_telepon')->nullable();
-             $table->foreign('id_bagian')->references('id_bagian')->on('bagian')->onDelete('cascade');
+            $table->foreign('id_bagian')->references('id_bagian')->on('bagian')->onDelete('cascade');
             $table->timestamps();
         });
     }

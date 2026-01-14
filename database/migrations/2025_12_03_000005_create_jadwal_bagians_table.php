@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('jadwal_bagians', function (Blueprint $table) {
             $table->id('id_jadwalBagian');
             $table->unsignedBigInteger('id_jadwal');
-            $table->integer('id_bagian');
+            $table->unsignedBigInteger('id_bagian');
             $table->foreign('id_jadwal')
                   ->references('id_jadwal')
                   ->on('jadwal_pelatihans')
