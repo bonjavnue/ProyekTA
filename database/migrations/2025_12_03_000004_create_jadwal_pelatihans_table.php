@@ -18,7 +18,7 @@ return new class extends Migration
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->string('tempat');
-            $table->dateTime('tenggat_presensi');
+            $table->dateTime('tenggat_presensi')->nullable(); //tambahan nullable
             $table->string('link_presensi')->nullable();
             $table->string('qr_code')->nullable();
             $table->dateTime('waktu_mulai_presensi')->nullable();

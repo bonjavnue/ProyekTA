@@ -84,7 +84,8 @@
                                 <p class="text-sm text-yellow-800 font-medium">Presensi sedang aktif</p>
                                 <p class="text-sm text-yellow-700 mt-1">
                                     Waktu aktif: {{ $jadwal->waktu_mulai_presensi->format('H:i') }} - {{ $jadwal->waktu_berakhir_presensi->format('H:i') }}
-                                    (Berakhir dalam {{ $jadwal->waktu_berakhir_presensi->diffInMinutes(now()) }} menit)
+                                    <br>
+                                    <strong>Sisa waktu: <span id="countdown-timer" class="text-red-600">00:00</span></strong>
                                 </p>
                             @endif
                         </div>
@@ -93,8 +94,15 @@
             @endif
 
             <div class="border-t border-gray-200 pt-6">
-                <p class="text-sm text-gray-600 mb-2">QR Code</p>
-                <p class="text-base font-mono text-gray-900">{{ $jadwal->qr_code }}</p>
+                <p class="text-sm text-gray-600 mb-4">QR Code</p>
+                @if($jadwal->qr_code)
+                    <div class="flex justify-center">
+                        <img src="{{ $jadwal->qr_code }}" alt="QR Code Presensi" class="w-64 h-64 border-2 border-gray-300 rounded-lg p-2 bg-white">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">Scan QR code dengan smartphone untuk presensi</p>
+                @else
+                    <p class="text-gray-500 text-sm">QR code belum di-generate</p>
+                @endif
             </div>
 
             @if($jadwal->catatan)
@@ -215,6 +223,30 @@ function deleteConfirm(id) {
     if (confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
         document.getElementById('delete-form-' + id).submit();
     }
+}
+
+// Countdown timer real-time
+const endTimeStr = "{{ $jadwal->waktu_berakhir_presensi?->toIso8601String() ?? '' }}";
+if (endTimeStr && document.getElementById('countdown-timer')) {
+    const endTime = new Date(endTimeStr).getTime();
+    
+    const countdownInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const remaining = endTime - now;
+        
+        if (remaining <= 0) {
+            document.getElementById('countdown-timer').textContent = '00:00';
+            clearInterval(countdownInterval);
+            document.getElementById('countdown-timer').parentElement.innerHTML = 
+                '<strong class="text-red-600">Presensi sudah berakhir</strong>';
+        } else {
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            const formattedMins = String(minutes).padStart(2, '0');
+            const formattedSecs = String(seconds).padStart(2, '0');
+            document.getElementById('countdown-timer').textContent = `${formattedMins}:${formattedSecs}`;
+        }
+    }, 1000);
 }
 </script>
 @endsection

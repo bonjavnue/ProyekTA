@@ -52,4 +52,37 @@ class JadwalPelatihan extends Model
     {
         return $this->hasMany(PresensiPelatihan::class, 'id_jadwal', 'id_jadwal');
     }
+
+
+    public function getStatusAttribute($value)
+    {
+        // Jika sudah lewat H+5 → SELESAI (permanent)
+        if (now() > $this->tenggat_presensi) {
+            if ($value !== 'selesai') {
+                $this->update(['status' => 'selesai']);
+            }
+            return 'selesai';
+        }
+
+        // Jika ada link presensi yang masih aktif → PUBLISHED
+        if ($this->waktu_berakhir_presensi && now() <= $this->waktu_berakhir_presensi) {
+            return 'published';
+        }
+
+        // Default → DRAFT
+        return 'draft';
+    }
+
+    // Check apakah bisa generate presensi
+    public function canGeneratePresensi()
+    {
+        // Hanya bisa generate jika:
+        // 1. Belum lewat H+5
+        // 2. Jam pelatihan sudah mulai
+        // 3. Status bukan 'selesai'
+        return now() <= $this->tenggat_presensi 
+            && now() >= $this->jam_mulai 
+            && $this->status !== 'selesai';
+    }    
+
 }

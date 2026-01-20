@@ -69,16 +69,23 @@
             </div>
 
             <!-- Tenggat Presensi -->
-            <div>
+            <!-- <div>
                 <label for="tenggat_presensi" class="block text-sm font-semibold text-gray-700 mb-2">Tenggat Presensi <span class="text-red-500">*</span></label>
                 <input type="datetime-local" id="tenggat_presensi" name="tenggat_presensi" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required value="{{ old('tenggat_presensi') }}">
                 @error('tenggat_presensi')
                     <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span>
                 @enderror
+            </div> -->
+
+            <!-- Tampilkan info otomatis -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800">
+                    ℹ️ <strong>Info:</strong> Tenggat presensi akan otomatis di-set ke <strong>H+5 dari tanggal pelaksanaan (23:59)</strong>
+                </p>
             </div>
 
             <!-- Status -->
-            <div>
+            <!-- <div>
                 <label for="status" class="block text-sm font-semibold text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
                 <select id="status" name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required>
                     <option value="draft">Draft</option>
@@ -88,7 +95,7 @@
                 @error('status')
                     <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span>
                 @enderror
-            </div>
+            </div> -->
 
             <!-- Bagian Peserta -->
             <div>
