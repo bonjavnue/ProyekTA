@@ -7,6 +7,7 @@ use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\JadwalPelatihanController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\KehadiranController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,10 @@ Route::middleware(['auth', 'role:admin,supervisor'])->group(function () {
     })->name('dashboard');
 
     Route::prefix('admin')->group(function () {
+        // Kehadiran routes (Admin & Supervisor)
+        Route::get('/kehadiran', [KehadiranController::class, 'index'])->name('kehadiran.index');
+        Route::get('/kehadiran/{id}', [KehadiranController::class, 'show'])->name('kehadiran.show');
+        Route::put('/kehadiran/{id}/{id_karyawan}', [KehadiranController::class, 'updateStatus'])->name('kehadiran.updateStatus');
 
         // Jadwal Pelatihan Management (Admin only)
         Route::middleware('role:admin')->group(function () {
@@ -104,3 +109,4 @@ Route::post('/api/presensi', [PresensiController::class, 'submitPresensi']);
 Route::get('/presensi/{id_jadwal}/{token}', function ($id_jadwal, $token) {
     return view('presensi.index', compact('id_jadwal', 'token'));
 })->name('presensi.index');
+

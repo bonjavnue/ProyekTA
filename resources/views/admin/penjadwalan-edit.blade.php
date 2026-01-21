@@ -69,6 +69,13 @@
                 @enderror
             </div>
 
+            <!-- Info Lokasi -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800">
+                    📍 <strong>Info:</strong> Lokasi presensi sudah otomatis di-set ke <strong>Kantor Pusat</strong> dengan radius <strong>200 meter</strong>
+                </p>
+            </div>
+
             <!-- Tenggat Presensi -->
             <div>
                 <label for="tenggat_presensi" class="block text-sm font-semibold text-gray-700 mb-2">Tenggat Presensi <span class="text-red-500">*</span></label>

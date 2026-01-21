@@ -86,6 +86,16 @@
                                 <p class="font-semibold text-brand-blue" x-text="jadwal?.sisa_waktu || '-'"></p>
                             </div>
                         </div>
+
+                        <!-- Lokasi Info (Jika ada) -->
+                        <div x-show="jadwal?.location_name" class="mt-4 pt-4 border-t border-blue-300">
+                            <p class="text-xs text-gray-600 mb-2">📍 <strong>Area Presensi:</strong></p>
+                            <div class="bg-white rounded p-3 space-y-1 text-sm">
+                                <p class="text-gray-700"><strong x-text="jadwal?.location_name || ''"></strong></p>
+                                <p class="text-gray-600">Radius: <strong x-text="`${jadwal?.location_radius || 100} meter`"></strong></p>
+                                <p class="text-gray-600" x-show="userDistance !== null">Jarak Anda: <strong x-text="`${userDistance} meter`" :class="userDistance > (jadwal?.location_radius || 100) ? 'text-red-600' : 'text-green-600'"></strong></p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Input Form -->
@@ -128,7 +138,10 @@
                             :disabled="!idKaryawan || !nikKaryawan || !namaKaryawan || isAbsen"
                             class="w-full py-3 bg-brand-blue hover:bg-blue-900 disabled:bg-gray-400 text-white font-bold rounded-lg transition shadow-md"
                         >
-                            <span x-show="!isAbsen">Absen Sekarang</span>
+                            <span x-show="!isAbsen">
+                                <span x-show="userLatitude && userLongitude">✓ Absen Sekarang</span>
+                                <span x-show="!userLatitude || !userLongitude">📍 Aktifkan Lokasi Dulu</span>
+                            </span>
                             <span x-show="isAbsen" class="flex items-center justify-center gap-2">
                                 <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -161,9 +174,66 @@
                 namaKaryawan: '',
                 presentedAt: null,
                 isAbsen: false,
+                userLatitude: null,
+                userLongitude: null,
+                userDistance: null,
                 
                 async init() {
+                    // Minta izin akses geolokasi saat init
+                    this.requestGeolocation();
                     await this.loadJadwal();
+                },
+                
+                requestGeolocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                this.userLatitude = position.coords.latitude;
+                                this.userLongitude = position.coords.longitude;
+                                this.calculateDistance();
+                                console.log('Lokasi berhasil didapat:', this.userLatitude, this.userLongitude);
+                            },
+                            (error) => {
+                                console.warn('Geolocation error:', error);
+                                // Izin ditolak atau error, lanjutkan tanpa lokasi
+                                if (error.code === error.PERMISSION_DENIED) {
+                                    this.error = 'Akses lokasi ditolak. Aktifkan izin lokasi di browser untuk fitur presensi berbasis lokasi.';
+                                }
+                            },
+                            {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 0
+                            }
+                        );
+                    } else {
+                        console.warn('Geolocation tidak didukung browser ini');
+                    }
+                },
+
+                calculateDistance() {
+                    if (!this.userLatitude || !this.userLongitude || !this.jadwal) {
+                        return;
+                    }
+
+                    if (!this.jadwal.location_latitude || !this.jadwal.location_longitude) {
+                        this.userDistance = null;
+                        return;
+                    }
+
+                    // Haversine formula
+                    const R = 6371000; // Radius bumi dalam meter
+                    const toRad = (deg) => (deg * Math.PI) / 180;
+                    
+                    const dLat = toRad(this.jadwal.location_latitude - this.userLatitude);
+                    const dLon = toRad(this.jadwal.location_longitude - this.userLongitude);
+                    
+                    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                              Math.cos(toRad(this.userLatitude)) * Math.cos(toRad(this.jadwal.location_latitude)) *
+                              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                    
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    this.userDistance = Math.round(R * c);
                 },
                 
                 async loadJadwal() {
@@ -181,6 +251,7 @@
                         
                         if (data.success) {
                             this.jadwal = data.jadwal;
+                            this.calculateDistance(); // Hitung ulang jarak setelah jadwal loaded
                         } else {
                             this.error = data.message || 'Gagal memuat data jadwal';
                         }
@@ -198,6 +269,20 @@
                         return;
                     }
 
+                    // Validasi lokasi jika jadwal punya lokasi
+                    if (this.jadwal.location_latitude && this.jadwal.location_longitude) {
+                        if (!this.userLatitude || !this.userLongitude) {
+                            this.error = 'Lokasi Anda tidak dapat diakses. Pastikan Anda memberikan izin akses lokasi.';
+                            return;
+                        }
+
+                        const maxDistance = this.jadwal.location_radius || 100;
+                        if (this.userDistance > maxDistance) {
+                            this.error = `Anda berada di luar area presensi. Jarak: ${this.userDistance}m (Max: ${maxDistance}m)`;
+                            return;
+                        }
+                    }
+
                     this.isAbsen = true;
                     this.error = null;
 
@@ -213,7 +298,9 @@
                                 token: this.token,
                                 id_karyawan: this.idKaryawan,
                                 nik: this.nikKaryawan,
-                                nama: this.namaKaryawan
+                                nama: this.namaKaryawan,
+                                user_latitude: this.userLatitude,
+                                user_longitude: this.userLongitude
                             })
                         });
 

@@ -26,6 +26,10 @@ class JadwalPelatihan extends Model
         'waktu_berakhir_presensi',
         'status',
         'catatan',
+        'location_latitude',
+        'location_longitude',
+        'location_radius',
+        'location_name',
     ];
 
     protected $casts = [
@@ -35,6 +39,9 @@ class JadwalPelatihan extends Model
         'tenggat_presensi' => 'datetime',
         'waktu_mulai_presensi' => 'datetime',
         'waktu_berakhir_presensi' => 'datetime',
+        'location_latitude' => 'double',
+        'location_longitude' => 'double',
+        'location_radius' => 'integer',
     ];
 
     //Relationships

@@ -25,6 +25,11 @@ return new class extends Migration
             $table->dateTime('waktu_berakhir_presensi')->nullable();
             $table->enum('status', ['draft', 'published', 'selesai'])->default('draft');
             $table->text('catatan')->nullable();
+            // Kolom untuk lokasi pelatihan
+            $table->double('location_latitude')->nullable();
+            $table->double('location_longitude')->nullable();
+            $table->integer('location_radius')->default(100)->nullable();
+            $table->string('location_name')->nullable();
             $table->foreign('id_jenis')->references('id_jenis')->on('jenis_pelatihan')->onDelete('cascade');
             $table->timestamps();
         });

@@ -33,9 +33,6 @@ class JadwalPelatihanController extends Controller
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'tempat' => 'required|string',
-            // 'tenggat_presensi' => 'required|date_format:Y-m-d\TH:i',
-            // 'status' => 'required|in:draft,published,selesai',
-            // mencoba untuk otomatis
             'catatan' => 'nullable|string',
             'bagians' => 'required|array|min:1',
             'bagians.*' => 'exists:bagian,id_bagian',
@@ -50,21 +47,24 @@ class JadwalPelatihanController extends Controller
         $link_presensi = 'https://presensi.example.com/' . uniqid();
         $qr_code = 'QR_' . uniqid();
 
-        // Create jadwal pelatihan
+        // Create jadwal pelatihan dengan lokasi otomatis dari konstanta PresensiController
         $jadwal = JadwalPelatihan::create([
             'id_jenis' => $validated['id_jenis'],
             'tanggal_pelaksanaan' => $validated['tanggal_pelaksanaan'],
             'jam_mulai' => $validated['tanggal_pelaksanaan'] . ' ' . $validated['jam_mulai'],
             'jam_selesai' => $validated['tanggal_pelaksanaan'] . ' ' . $validated['jam_selesai'],
             'tempat' => $validated['tempat'],
-            // 'tenggat_presensi' => $validated['tenggat_presensi'],
-            'tenggat_presensi' => $tenggat_presensi, //auto h+5
+            'tenggat_presensi' => $tenggat_presensi,
             'link_presensi' => null,
             'qr_code' => null,
             'waktu_mulai_presensi' => null,
             'waktu_berakhir_presensi' => null,
             'status' => 'draft',
             'catatan' => $validated['catatan'] ?? null,
+            'location_latitude' => -7.048357, 
+            'location_longitude' => 110.437872,
+            'location_radius' => 700,
+            'location_name' => 'Kantor Pusat',
         ]);
 
         // Assign bagians to jadwal
@@ -74,8 +74,7 @@ class JadwalPelatihanController extends Controller
                 'id_bagian' => $id_bagian,
             ]);
         }
-        // tambahan
-        // return redirect()->route('penjadwalan.index')->with('success', 'Jadwal pelatihan berhasil dibuat');
+        
         return redirect()->route('penjadwalan.index')
             ->with('success', 'Jadwal pelatihan berhasil dibuat. Tenggat presensi: ' . $tenggat_presensi->format('d M Y H:i'));
     }
@@ -107,7 +106,7 @@ class JadwalPelatihanController extends Controller
             'bagians.*' => 'exists:bagian,id_bagian',
         ]);
 
-        // Update jadwal pelatihan
+        // Update jadwal pelatihan dengan lokasi yang sama (dari konstanta)
         $jadwal->update([
             'id_jenis' => $validated['id_jenis'],
             'tanggal_pelaksanaan' => $validated['tanggal_pelaksanaan'],
@@ -117,6 +116,11 @@ class JadwalPelatihanController extends Controller
             'tenggat_presensi' => $validated['tenggat_presensi'],
             'status' => $validated['status'],
             'catatan' => $validated['catatan'] ?? null,
+            // Lokasi tetap sama dari konstanta (tidak ada input dari form)
+            'location_latitude' => -7.048357, 
+            'location_longitude' => 110.437872,
+            'location_radius' => 200,
+            'location_name' => 'Kantor Pusat',
         ]);
 
         // Update bagians

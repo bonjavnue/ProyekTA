@@ -20,6 +20,9 @@ return new class extends Migration
             $table->dateTime('waktu_presensi')->nullable();
             $table->string('bukti_kehadiran')->nullable();
             $table->string('dicatat_oleh')->nullable();
+            // Kolom untuk lokasi saat absen (GPS tracking)
+            $table->double('user_latitude')->nullable();
+            $table->double('user_longitude')->nullable();
             $table->timestamps();
 
             $table->foreign('id_jadwal')->references('id_jadwal')->on('jadwal_pelatihans')->onDelete('cascade');

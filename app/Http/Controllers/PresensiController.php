@@ -10,6 +10,12 @@ use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
+    // ========== LOKASI KANTOR YANG FIXED ==========
+    private const OFFICE_LATITUDE = -7.048357;
+    private const OFFICE_LONGITUDE = 110.437872;
+    private const OFFICE_RADIUS = 700; // meter
+    private const OFFICE_NAME = "Kantor Pusat";
+    // =============================================
     // public function getJadwal($id_jadwal)
     // {
     //     try {
@@ -154,12 +160,17 @@ class PresensiController extends Controller
         return response()->json([
             'success' => true,
             'jadwal' => [
+                'id_jadwal' => $jadwal->id_jadwal,
                 'nama_pelatihan' => $jadwal->JenisPelatihan->nama_jenis,
                 'tanggal' => $jadwal->tanggal_pelaksanaan->format('d M Y'),
                 'jam_mulai' => $jadwal->jam_mulai->format('H:i'),
                 'jam_selesai' => $jadwal->jam_selesai->format('H:i'),
                 'tempat' => $jadwal->tempat,
                 'sisa_waktu' => $sisaWaktu . ' menit',
+                'location_latitude' => self::OFFICE_LATITUDE,
+                'location_longitude' => self::OFFICE_LONGITUDE,
+                'location_radius' => self::OFFICE_RADIUS,
+                'location_name' => self::OFFICE_NAME,
             ]
         ]);
     }
@@ -172,6 +183,8 @@ class PresensiController extends Controller
             'id_karyawan' => 'required|string',
             'nik' => 'required|string',
             'nama' => 'required|string',
+            'user_latitude' => 'required|numeric|between:-90,90',
+            'user_longitude' => 'required|numeric|between:-180,180',
         ]);
 
         $jadwal = JadwalPelatihan::find($validated['id_jadwal']);
@@ -225,6 +238,27 @@ class PresensiController extends Controller
             ], 400);
         }
 
+        // Validasi lokasi jika jadwal punya lokasi
+        if (self::OFFICE_LATITUDE && self::OFFICE_LONGITUDE) {
+            $distance = PresensiPelatihan::calculateDistance(
+                $validated['user_latitude'],
+                $validated['user_longitude'],
+                self::OFFICE_LATITUDE,
+                self::OFFICE_LONGITUDE
+            );
+
+            $maxDistance = self::OFFICE_RADIUS;
+
+            if ($distance > $maxDistance) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda berada di luar area ' . self::OFFICE_NAME . '. Jarak: ' . round($distance) . 'm dari lokasi (Max: ' . $maxDistance . 'm)',
+                    'distance' => round($distance),
+                    'max_distance' => $maxDistance
+                ], 403);
+            }
+        }
+
         // Simpan presensi
         PresensiPelatihan::create([
             'id_jadwal' => $jadwal->id_jadwal,
@@ -232,7 +266,9 @@ class PresensiController extends Controller
             'status_kehadiran' => 'Hadir',
             'waktu_presensi' => now(),
             'bukti_kehadiran' => null,
-            'dicatat_oleh' => $karyawan->email ?? null, // atau auth()->user()->email jika ada login
+            'dicatat_oleh' => 'karyawan',  // Dicatat oleh karyawan
+            'user_latitude' => $validated['user_latitude'],
+            'user_longitude' => $validated['user_longitude'],
         ]);
 
         return response()->json([

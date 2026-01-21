@@ -20,11 +20,15 @@ class PresensiPelatihan extends Model
         'status_kehadiran',
         'waktu_presensi',
         'bukti_kehadiran',
-        'dicatat_oleh'
+        'dicatat_oleh',
+        'user_latitude',
+        'user_longitude'
     ];
 
     protected $casts = [
         'waktu_presensi' => 'datetime',
+        'user_latitude' => 'double',
+        'user_longitude' => 'double',
     ];
 
     //Relationships
@@ -41,5 +45,30 @@ class PresensiPelatihan extends Model
     public function Pencatat()
     {
         return $this->belongsTo(User::class, 'dicatat_oleh', 'email');
+    }
+
+    /**
+     * Hitung jarak antara dua koordinat menggunakan Haversine Formula
+     * @param float $userLat Latitude user
+     * @param float $userLon Longitude user
+     * @param float $locLat Latitude lokasi
+     * @param float $locLon Longitude lokasi
+     * @return float Jarak dalam meter
+     */
+    public static function calculateDistance($userLat, $userLon, $locLat, $locLon)
+    {
+        $earthRadiusM = 6371000; // Radius bumi dalam meter
+
+        $dLat = deg2rad($locLat - $userLat);
+        $dLon = deg2rad($locLon - $userLon);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($userLat)) * cos(deg2rad($locLat)) *
+             sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        $distance = $earthRadiusM * $c;
+
+        return $distance;
     }
 }
