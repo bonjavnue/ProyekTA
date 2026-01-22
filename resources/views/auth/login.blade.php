@@ -10,21 +10,21 @@
             
             <div class="hidden md:block md:w-1/2 text-white pr-12">
                 <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-yellow/20 border border-brand-yellow/30 text-brand-yellow text-xs font-bold mb-6 tracking-widest uppercase">
-                    Admin Portal v2.0
+                    Admin Portal
                 </div>
                 <h1 class="text-5xl font-extrabold leading-tight mb-6">
-                    Mulai Kelola <br> <span class="text-brand-yellow">Data Karyawan</span> <br> Lebih Cepat.
+                    Pengelolan <br> <span class="text-brand-yellow">Pelatihan</span> <br> Karyawan
                 </h1>
                 <p class="text-blue-100 text-lg opacity-80 leading-relaxed">
-                    Sistem manajemen terintegrasi untuk efisiensi operasional dan penjadwalan pelatihan yang lebih terstruktur.
+                    PT GLORY INDUSTRIAL SEMARANG
                 </p>
                 <div class="mt-10 flex items-center space-x-4">
                     <div class="flex -space-x-2">
-                        <img class="w-10 h-10 rounded-full border-2 border-brand-blue" src="https://i.pravatar.cc/100?u=1" alt="">
+                        <!-- <img class="w-10 h-10 rounded-full border-2 border-brand-blue" src="https://i.pravatar.cc/100?u=1" alt="">
                         <img class="w-10 h-10 rounded-full border-2 border-brand-blue" src="https://i.pravatar.cc/100?u=2" alt="">
-                        <img class="w-10 h-10 rounded-full border-2 border-brand-blue" src="https://i.pravatar.cc/100?u=3" alt="">
+                        <img class="w-10 h-10 rounded-full border-2 border-brand-blue" src="https://i.pravatar.cc/100?u=3" alt=""> -->
                     </div>
-                    <p class="text-sm text-blue-200">Dipercaya oleh +500 Supervisor</p>
+                    <!-- <p class="text-sm text-blue-200">Dipercaya oleh +500 Supervisor</p> -->
                 </div>
             </div>
 

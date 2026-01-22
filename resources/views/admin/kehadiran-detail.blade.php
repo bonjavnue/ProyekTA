@@ -31,12 +31,31 @@
         </div>
     </div>
 
+    <!-- Action Buttons -->
+    <div class="mb-6 flex flex-col sm:flex-row gap-3">
+        <button @click="selectAllPresent()" 
+                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-all shadow-sm">
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Hadir Semua
+        </button>
+        <button @click="resetAllStatus()" 
+                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium text-sm transition-all shadow-sm">
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Reset Semua
+        </button>
+    </div>
+
     <!-- Tabel Kehadiran -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <table class="w-full text-left">
             <thead>
                 <tr class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
                     <th class="px-6 py-4">Karyawan</th>
+                    <th class="px-6 py-4 text-center">Tanggal</th>
                     <th class="px-6 py-4 text-center">Waktu Presensi</th>
                     <th class="px-6 py-4 text-center">Status</th>
                     <th class="px-6 py-4 text-center">Dicatat Oleh</th>
@@ -55,6 +74,10 @@
                                     <p class="text-[10px] text-gray-400 uppercase" x-text="'NIK: ' + karyawan.nik"></p>
                                 </div>
                             </div>
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm font-mono">
+                            <span x-show="karyawan.waktu_presensi" x-text="formatDate(karyawan.waktu_presensi)"></span>
+                            <span x-show="!karyawan.waktu_presensi" class="text-gray-400 italic">--/--/--</span>
                         </td>
                         <td class="px-6 py-4 text-center text-sm font-mono">
                             <span x-show="karyawan.waktu_presensi" x-text="formatTime(karyawan.waktu_presensi)"></span>
@@ -136,12 +159,15 @@ function kehadiranDetailApp() {
                     const idx = this.karyawans.findIndex(k => k.id_karyawan == idKaryawan);
                     if (idx >= 0) {
                         this.karyawans[idx].status = newStatus;
-                        this.karyawans[idx].dicatat_oleh = data.dicatat_oleh || null;
                         
                         if (newStatus === 'Belum Presensi') {
                             this.karyawans[idx].waktu_presensi = null;
-                        } else if (data.waktu_presensi) {
-                            this.karyawans[idx].waktu_presensi = data.waktu_presensi;
+                            this.karyawans[idx].dicatat_oleh = null;
+                        } else {
+                            this.karyawans[idx].dicatat_oleh = data.dicatat_oleh || null;
+                            if (data.waktu_presensi) {
+                                this.karyawans[idx].waktu_presensi = data.waktu_presensi;
+                            }
                         }
                     }
                     console.log('Status berhasil diupdate');
@@ -167,6 +193,30 @@ function kehadiranDetailApp() {
             if (!timestamp) return '--:--:--';
             const date = new Date(timestamp);
             return date.toLocaleTimeString('id-ID');
+        },
+        
+        formatDate(timestamp) {
+            if (!timestamp) return '--/--/--';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+        },
+        
+        async selectAllPresent() {
+            if (!confirm('Ubah status semua karyawan menjadi Hadir?')) return;
+            
+            for (const karyawan of this.karyawans) {
+                await this.updateKaryawanStatus(karyawan.id_karyawan, 'Hadir');
+            }
+            alert('Semua karyawan berhasil diubah menjadi Hadir');
+        },
+        
+        async resetAllStatus() {
+            if (!confirm('Reset status semua karyawan menjadi Belum Presensi?')) return;
+            
+            for (const karyawan of this.karyawans) {
+                await this.updateKaryawanStatus(karyawan.id_karyawan, 'Belum Presensi');
+            }
+            alert('Semua status berhasil direset menjadi Belum Presensi');
         }
     }
 }

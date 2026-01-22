@@ -43,6 +43,7 @@ Route::middleware(['auth', 'role:admin,supervisor'])->group(function () {
         Route::get('/kehadiran', [KehadiranController::class, 'index'])->name('kehadiran.index');
         Route::get('/kehadiran/{id}', [KehadiranController::class, 'show'])->name('kehadiran.show');
         Route::put('/kehadiran/{id}/{id_karyawan}', [KehadiranController::class, 'updateStatus'])->name('kehadiran.updateStatus');
+        Route::get('/kehadiran-export', [KehadiranController::class, 'export'])->name('kehadiran.export');
 
         // Jadwal Pelatihan Management (Admin only)
         Route::middleware('role:admin')->group(function () {

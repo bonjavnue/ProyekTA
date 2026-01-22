@@ -6,6 +6,7 @@ use App\Models\JadwalPelatihan;
 use App\Models\Karyawan;
 use App\Models\PresensiPelatihan;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class KehadiranController extends Controller
 {
@@ -40,7 +41,40 @@ class KehadiranController extends Controller
                 return $jadwal;
             });
         
-        return view('admin.kehadiran', compact('jadwals'));
+        // Format data untuk JavaScript
+        $jadwalsForJs = $jadwals->map(function ($jadwal) {
+            $totalKaryawan = $jadwal->total_karyawan ?? 1;
+            $hadirCount = $jadwal->hadir_count ?? 0;
+            $persentaseHadir = $totalKaryawan > 0 ? round(($hadirCount / $totalKaryawan) * 100) : 0;
+            
+            // Tentukan status jadwal
+            $today = now()->startOfDay();
+            $jadwalDate = $jadwal->tanggal_pelaksanaan->startOfDay();
+            
+            if ($jadwalDate->isBefore($today)) {
+                $status = 'ENDED';
+            } elseif ($jadwalDate->isToday()) {
+                $status = 'ONGOING';
+            } else {
+                $status = 'UPCOMING';
+            }
+            
+            return [
+                'id_jadwal' => $jadwal->id_jadwal,
+                'nama_jenis' => $jadwal->JenisPelatihan->nama_jenis,
+                'tempat' => $jadwal->tempat,
+                'tanggal_pelaksanaan' => $jadwal->tanggal_pelaksanaan->format('d M Y'),
+                'jam_mulai' => $jadwal->jam_mulai->format('H:i'),
+                'jam_selesai' => $jadwal->jam_selesai->format('H:i'),
+                'hadir_count' => $jadwal->hadir_count,
+                'belum_absen_count' => $jadwal->belum_absen_count,
+                'total_karyawan' => $totalKaryawan,
+                'persentase_hadir' => $persentaseHadir,
+                'status' => $status,
+            ];
+        })->values();
+        
+        return view('admin.kehadiran', compact('jadwals', 'jadwalsForJs'));
     }
     
     // Detail jadwal + semua karyawan + status mereka
@@ -145,6 +179,65 @@ class KehadiranController extends Controller
                 'success' => false,
                 'message' => 'Server error: ' . $e->getMessage()
             ], 500);
+        }
+    }
+    
+    // Export laporan kehadiran ke PDF atau Excel
+    public function export(Request $request)
+    {
+        $format = $request->get('format', 'pdf');
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+        
+        // Query jadwal dengan filter tanggal jika ada
+        $jadwals = JadwalPelatihan::with(['JenisPelatihan', 'JadwalBagian'])
+            ->when($dateFrom, function ($query) use ($dateFrom) {
+                return $query->where('tanggal_pelaksanaan', '>=', $dateFrom);
+            })
+            ->when($dateTo, function ($query) use ($dateTo) {
+                return $query->where('tanggal_pelaksanaan', '<=', $dateTo);
+            })
+            ->orderBy('tanggal_pelaksanaan', 'desc')
+            ->get()
+            ->map(function ($jadwal) {
+                // Hitung statistik kehadiran
+                $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+                $totalKaryawan = Karyawan::whereIn('id_bagian', $bagianIds)->count();
+                
+                $hadirCount = PresensiPelatihan::where('id_jadwal', $jadwal->id_jadwal)
+                    ->where('status_kehadiran', 'Hadir')
+                    ->count();
+                
+                $totalPresensi = PresensiPelatihan::where('id_jadwal', $jadwal->id_jadwal)
+                    ->distinct('id_karyawan')
+                    ->count();
+                
+                $belumAbsenCount = $totalKaryawan - $totalPresensi;
+                $persentaseHadir = $totalKaryawan > 0 ? round(($hadirCount / $totalKaryawan) * 100) : 0;
+                
+                return [
+                    'id_jadwal' => $jadwal->id_jadwal,
+                    'nama_jenis' => $jadwal->JenisPelatihan->nama_jenis,
+                    'tempat' => $jadwal->tempat,
+                    'tanggal' => $jadwal->tanggal_pelaksanaan->format('d M Y'),
+                    'jam_mulai' => $jadwal->jam_mulai->format('H:i'),
+                    'jam_selesai' => $jadwal->jam_selesai->format('H:i'),
+                    'total_karyawan' => $totalKaryawan,
+                    'hadir' => $hadirCount,
+                    'belum_absen' => $belumAbsenCount,
+                    'persentase' => $persentaseHadir . '%'
+                ];
+            });
+        
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('reports.kehadiran-pdf', compact('jadwals'))
+                ->setPaper('a4', 'landscape');
+            
+            $filename = 'Laporan_Kehadiran_' . now()->format('d-m-Y_H-i-s') . '.pdf';
+            return $pdf->download($filename);
+        } else {
+            // Excel export - return simple view for now, bisa di-enhance dengan library Excel
+            return response()->json(['message' => 'Excel export belum diimplementasikan'], 501);
         }
     }
 }

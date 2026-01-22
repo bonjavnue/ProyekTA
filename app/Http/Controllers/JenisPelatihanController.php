@@ -33,7 +33,7 @@ class JenisPelatihanController extends Controller
     {
         $search = request('search', '');
         $sortBy = request('sort_by', 'created_at');
-        $sortOrder = request('sort_order', 'desc');
+        $sortOrder = request('sort_order', 'asc');
         $perPage = request('per_page', 10);
 
         // Validasi per_page - hanya terima nilai yang diizinkan
