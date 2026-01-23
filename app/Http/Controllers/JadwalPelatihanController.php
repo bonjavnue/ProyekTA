@@ -12,10 +12,51 @@ use Carbon\Carbon;
 
 class JadwalPelatihanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jadwalPelatihans = JadwalPelatihan::with('JenisPelatihan', 'JadwalBagian')->get();
-        return view('admin.penjadwalan', compact('jadwalPelatihans'));
+        $perPage = request('per_page', 10);
+        
+        // Validasi per_page - hanya terima nilai yang diizinkan
+        $allowedPerPage = [5, 10, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+        
+        $query = JadwalPelatihan::with('JenisPelatihan', 'JadwalBagian');
+        
+        // Handle sorting
+        $sortBy = $request->get('sort_by', 'id_jadwal');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Validate sort parameters
+        $allowedSortColumns = ['id_jadwal', 'tanggal_pelaksanaan', 'status'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'id_jadwal';
+        }
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
+        // Apply sorting
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Paginate results
+        $jadwalPelatihans = $query->paginate($perPage)->appends(request()->query());
+        
+        // Format data untuk Alpine.js (hanya yang di halaman saat ini)
+        $jadwalForJs = $jadwalPelatihans->getCollection()->map(function ($jadwal) {
+            return [
+                'id_jadwal' => $jadwal->id_jadwal,
+                'nama_jenis' => $jadwal->JenisPelatihan->nama_jenis ?? '-',
+                'tanggal_pelaksanaan' => $jadwal->tanggal_pelaksanaan->format('Y-m-d'),
+                'jam_mulai' => $jadwal->jam_mulai->format('H:i'),
+                'jam_selesai' => $jadwal->jam_selesai->format('H:i'),
+                'tempat' => $jadwal->tempat,
+                'status' => $jadwal->status,
+            ];
+        });
+        
+        return view('admin.penjadwalan', compact('jadwalPelatihans', 'jadwalForJs', 'perPage'));
     }
 
     public function create()
@@ -37,6 +78,32 @@ class JadwalPelatihanController extends Controller
             'bagians' => 'required|array|min:1',
             'bagians.*' => 'exists:bagian,id_bagian',
         ]);
+        
+        // Check untuk duplikasi jadwal
+        $existingJadwal = JadwalPelatihan::where([
+            ['id_jenis', '=', $validated['id_jenis']],
+            ['tanggal_pelaksanaan', '=', $validated['tanggal_pelaksanaan']],
+            ['jam_mulai', '=', $validated['jam_mulai'] . ':00'], // Format TIME (HH:MM:SS)
+            ['jam_selesai', '=', $validated['jam_selesai'] . ':00'], // Format TIME (HH:MM:SS)
+            ['tempat', '=', $validated['tempat']],
+        ])->first();
+        
+        if ($existingJadwal) {
+            // Check apakah bagian-bagian yang diminta sudah semua ada di jadwal yang ada
+            $existingBagians = JadwalBagian::where('id_jadwal', $existingJadwal->id_jadwal)
+                ->pluck('id_bagian')
+                ->toArray();
+            
+            $requestedBagians = $validated['bagians'];
+            
+            // Check apakah semua bagian yang diminta sudah ada
+            if (count(array_intersect($existingBagians, $requestedBagians)) === count($requestedBagians)) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Jenis pelatihan, waktu, dan tempat yang Anda masukkan sudah ada di sistem. Silakan periksa kembali.');
+                    // ->with('error', 'Jadwal dengan kombinasi data yang sama (Jenis Pelatihan, Tanggal, Jam, Tempat, dan Bagian) sudah ada. Silakan ubah salah satu parameter atau periksa jadwal yang sudah ada.');
+            }
+        }
         
         // Auto-calculate tenggat_presensi = H+5 dari tanggal pelaksanaan (23:59:59)
         $tenggat_presensi = Carbon::parse($validated['tanggal_pelaksanaan'])
@@ -105,6 +172,34 @@ class JadwalPelatihanController extends Controller
             'bagians' => 'required|array|min:1',
             'bagians.*' => 'exists:bagian,id_bagian',
         ]);
+
+        // Check untuk duplikasi jadwal (exclude jadwal yang sedang diedit)
+        $existingJadwal = JadwalPelatihan::where([
+            ['id_jenis', '=', $validated['id_jenis']],
+            ['tanggal_pelaksanaan', '=', $validated['tanggal_pelaksanaan']],
+            ['jam_mulai', '=', $validated['jam_mulai'] . ':00'], // Format TIME (HH:MM:SS)
+            ['jam_selesai', '=', $validated['jam_selesai'] . ':00'], // Format TIME (HH:MM:SS)
+            ['tempat', '=', $validated['tempat']],
+        ])
+        ->where('id_jadwal', '!=', $id) // Exclude jadwal yang sedang diedit
+        ->first();
+        
+        if ($existingJadwal) {
+            // Check apakah bagian-bagian yang diminta sudah semua ada di jadwal yang ada
+            $existingBagians = JadwalBagian::where('id_jadwal', $existingJadwal->id_jadwal)
+                ->pluck('id_bagian')
+                ->toArray();
+            
+            $requestedBagians = $validated['bagians'];
+            
+            // Check apakah semua bagian yang diminta sudah ada
+            if (count(array_intersect($existingBagians, $requestedBagians)) === count($requestedBagians)) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Jenis pelatihan, waktu, dan tempat yang Anda masukkan sudah ada di sistem. Silakan periksa kembali.');
+                    // ->with('error', 'Jadwal dengan kombinasi data yang sama (Jenis Pelatihan, Tanggal, Jam, Tempat, dan Bagian) sudah ada. Silakan ubah salah satu parameter atau periksa jadwal yang sudah ada.');
+            }
+        }
 
         // Update jadwal pelatihan dengan lokasi yang sama (dari konstanta)
         $jadwal->update([

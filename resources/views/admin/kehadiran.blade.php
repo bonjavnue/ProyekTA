@@ -5,6 +5,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
 <style>
+    [x-cloak] { 
+        display: none !important; 
+    }
     .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
@@ -127,7 +130,7 @@
     </div>
 
     <!-- Export Modal -->
-    <div x-show="exportModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div x-show="exportModalOpen" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4">
             <div class="p-6 border-b border-gray-200">
                 <h2 class="text-lg font-bold text-gray-800">Export Laporan Kehadiran</h2>
@@ -163,9 +166,46 @@
             </div>
         </div>
     </div>
+
+    <!-- Pagination Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-6">
+        <div class="bg-gray-50 border-t border-gray-200 px-4 py-4 sm:px-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <!-- Pagination Info -->
+                <div class="text-sm text-gray-600">
+                    Menampilkan <span class="font-bold text-gray-900">{{ $jadwals->firstItem() ?? 0 }}</span> sampai <span class="font-bold text-gray-900">{{ $jadwals->lastItem() ?? 0 }}</span> dari <span class="font-bold text-gray-900">{{ $jadwals->total() }}</span> hasil
+                </div>
+
+                <!-- Per Page Dropdown -->
+                <div class="flex items-center gap-2">
+                    <label class="text-sm text-gray-600 whitespace-nowrap">Per page</label>
+                    <select onchange="changePerPage(this.value)" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue text-sm bg-white font-medium">
+                        <option value="6" {{ $perPage == 6 ? 'selected' : '' }}>6</option>
+                        <option value="9" {{ $perPage == 9 ? 'selected' : '' }}>9</option>
+                        <option value="18" {{ $perPage == 18 ? 'selected' : '' }}>18</option>
+                        <option value="24" {{ $perPage == 24 ? 'selected' : '' }}>24</option>
+                        <option value="30" {{ $perPage == 30 ? 'selected' : '' }}>30</option>
+                        <option value="all" {{ $perPage == PHP_INT_MAX ? 'selected' : '' }}>Semua</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Pagination Links -->
+            <div class="mt-4">
+                {{ $jadwals->links('pagination.custom') }}
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+function changePerPage(value) {
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', value);
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
 function kehadiranLiveSearch() {
     return {
         searchQuery: '',

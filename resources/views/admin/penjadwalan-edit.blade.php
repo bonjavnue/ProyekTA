@@ -19,6 +19,36 @@
             @csrf
             @method('PUT')
 
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0-12a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+                        <div>
+                            <h3 class="font-semibold text-red-800 mb-2">Terjadi Kesalahan</h3>
+                            <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Session Error (Duplikasi Jadwal) -->
+            @if (session('error'))
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0-12a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+                        <div>
+                            <h3 class="font-semibold text-red-800 mb-1">⚠️ Jadwal Sudah Terdaftar</h3>
+                            <p class="text-sm text-red-700">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Jenis Pelatihan -->
             <div>
                 <label for="id_jenis" class="block text-sm font-semibold text-gray-700 mb-2">Jenis Pelatihan <span class="text-red-500">*</span></label>
@@ -36,7 +66,7 @@
             <!-- Tanggal Pelaksanaan -->
             <div>
                 <label for="tanggal_pelaksanaan" class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Pelaksanaan <span class="text-red-500">*</span></label>
-                <input type="date" id="tanggal_pelaksanaan" name="tanggal_pelaksanaan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required value="{{ $jadwal->tanggal_pelaksanaan->format('Y-m-d') }}">
+                <input type="date" id="tanggal_pelaksanaan" name="tanggal_pelaksanaan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required value="{{ old('tanggal_pelaksanaan', $jadwal->tanggal_pelaksanaan->format('Y-m-d')) }}">
                 @error('tanggal_pelaksanaan')
                     <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span>
                 @enderror
