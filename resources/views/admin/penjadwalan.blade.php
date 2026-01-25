@@ -142,7 +142,7 @@
         </div>
 
         <!-- Pagination Section -->
-        <div class="bg-gray-50 border-t border-gray-200 px-4 py-4 sm:px-6">
+        <div class="bg-white-50 border-t border-white-200 px-4 py-4 sm:px-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <!-- Pagination Info -->
                 <div class="text-sm text-gray-600">

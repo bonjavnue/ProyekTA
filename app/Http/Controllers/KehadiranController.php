@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JadwalPelatihan;
 use App\Models\Karyawan;
 use App\Models\PresensiPelatihan;
+use App\Models\Bagian;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -28,11 +29,28 @@ class KehadiranController extends Controller
         $query = JadwalPelatihan::with(['JenisPelatihan', 'JadwalBagian'])
             ->orderBy('tanggal_pelaksanaan', 'desc');
         
+        // Filter untuk supervisor - hanya jadwal yang melibatkan bagian supervisor
+        $currentUser = auth()->user();
+        if ($currentUser->role === 'supervisor') {
+            // Ambil bagian yang terikat ke supervisor ini
+            $supervisorBagian = Bagian::where('email', $currentUser->email)->first();
+            
+            if ($supervisorBagian) {
+                // Filter jadwal yang melibatkan bagian ini
+                $query->whereHas('JadwalBagian', function ($q) use ($supervisorBagian) {
+                    $q->where('id_bagian', $supervisorBagian->id_bagian);
+                });
+            } else {
+                // Jika supervisor tidak punya bagian, tampilkan empty
+                $query->where('id_jadwal', null); // Return empty result
+            }
+        }
+        
         // Paginate results
         $jadwals = $query->paginate($perPage)->appends(request()->query());
         
         // Map data untuk kehadiran info
-        $jadwalsMapped = $jadwals->getCollection()->map(function ($jadwal) {
+        $jadwalsMapped = $jadwals->getCollection()->map(function ($jadwal) use ($currentUser) {
             // Hitung total karyawan seharusnya hadir
             $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
             $totalKaryawan = Karyawan::whereIn('id_bagian', $bagianIds)->count();
@@ -99,8 +117,23 @@ class KehadiranController extends Controller
         $jadwal = JadwalPelatihan::with(['JenisPelatihan', 'JadwalBagian'])
             ->findOrFail($id);
         
+        $currentUser = auth()->user();
+        
         // Ambil bagian yang terdaftar di jadwal ini
         $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+        
+        // Jika supervisor, filter hanya karyawan dari bagian supervisor
+        if ($currentUser->role === 'supervisor') {
+            $supervisorBagian = Bagian::where('email', $currentUser->email)->first();
+            
+            if (!$supervisorBagian || !in_array($supervisorBagian->id_bagian, $bagianIds)) {
+                // Supervisor tidak punya akses ke jadwal ini karena tidak sesuai dengan bagiannya
+                abort(403, 'Anda tidak memiliki akses ke jadwal ini');
+            }
+            
+            // Filter bagian ids hanya untuk bagian supervisor
+            $bagianIds = [$supervisorBagian->id_bagian];
+        }
         
         // Ambil semua karyawan dari bagian tersebut
         $karyawans = Karyawan::whereIn('id_bagian', $bagianIds)
@@ -210,16 +243,32 @@ class KehadiranController extends Controller
         $dateFrom = $request->get('date_from');
         $dateTo = $request->get('date_to');
         
+        $currentUser = auth()->user();
+        
         // Query jadwal dengan filter tanggal jika ada
-        $jadwals = JadwalPelatihan::with(['JenisPelatihan', 'JadwalBagian'])
-            ->when($dateFrom, function ($query) use ($dateFrom) {
-                return $query->where('tanggal_pelaksanaan', '>=', $dateFrom);
+        $query = JadwalPelatihan::with(['JenisPelatihan', 'JadwalBagian'])
+            ->when($dateFrom, function ($q) use ($dateFrom) {
+                return $q->where('tanggal_pelaksanaan', '>=', $dateFrom);
             })
-            ->when($dateTo, function ($query) use ($dateTo) {
-                return $query->where('tanggal_pelaksanaan', '<=', $dateTo);
-            })
-            ->orderBy('tanggal_pelaksanaan', 'desc')
-            ->get()
+            ->when($dateTo, function ($q) use ($dateTo) {
+                return $q->where('tanggal_pelaksanaan', '<=', $dateTo);
+            });
+        
+        // Filter untuk supervisor
+        if ($currentUser->role === 'supervisor') {
+            $supervisorBagian = Bagian::where('email', $currentUser->email)->first();
+            
+            if ($supervisorBagian) {
+                $query->whereHas('JadwalBagian', function ($q) use ($supervisorBagian) {
+                    $q->where('id_bagian', $supervisorBagian->id_bagian);
+                });
+            } else {
+                // Supervisor tanpa bagian tidak bisa export
+                abort(403, 'Anda tidak memiliki bagian yang terikat');
+            }
+        }
+        
+        $jadwals = $query->orderBy('tanggal_pelaksanaan', 'desc')->get()
             ->map(function ($jadwal) {
                 // Hitung statistik kehadiran
                 $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
@@ -267,8 +316,19 @@ class KehadiranController extends Controller
         $jadwal = JadwalPelatihan::with(['JenisPelatihan', 'JadwalBagian'])
             ->findOrFail($id);
         
+        $currentUser = auth()->user();
+        
         // Ambil bagian yang terdaftar di jadwal ini
         $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+        
+        // Jika supervisor, validasi akses
+        if ($currentUser->role === 'supervisor') {
+            $supervisorBagian = Bagian::where('email', $currentUser->email)->first();
+            
+            if (!$supervisorBagian || !in_array($supervisorBagian->id_bagian, $bagianIds)) {
+                abort(403, 'Anda tidak memiliki akses untuk export jadwal ini');
+            }
+        }
         
         // Ambil semua karyawan dari bagian tersebut
         $karyawans = Karyawan::whereIn('id_bagian', $bagianIds)
@@ -325,8 +385,22 @@ class KehadiranController extends Controller
         $jadwal = JadwalPelatihan::with(['JenisPelatihan', 'JadwalBagian'])
             ->findOrFail($id);
         
+        $currentUser = auth()->user();
+        
         // Ambil bagian yang terdaftar di jadwal ini
         $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+        
+        // Jika supervisor, validasi akses dan filter hanya bagian supervisor
+        if ($currentUser->role === 'supervisor') {
+            $supervisorBagian = Bagian::where('email', $currentUser->email)->first();
+            
+            if (!$supervisorBagian || !in_array($supervisorBagian->id_bagian, $bagianIds)) {
+                abort(403, 'Anda tidak memiliki akses untuk export jadwal ini');
+            }
+            
+            // Filter hanya bagian supervisor
+            $bagianIds = [$supervisorBagian->id_bagian];
+        }
         
         // Ambil semua karyawan dari bagian tersebut
         $karyawans = Karyawan::whereIn('id_bagian', $bagianIds)

@@ -61,39 +61,39 @@
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold tracking-wider">
-                        <th class="p-4 w-4">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left w-4">
                             <input type="checkbox" id="selectAllCheckbox" class="w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" title="Select all data">
                         </th>
-                        <th class="p-4 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('id_karyawan')">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('id_karyawan')">
                             ID Karyawan
                             <span class="inline-block ml-1 text-gray-300 group-hover:text-brand-blue" id="sort-id_karyawan">↓</span>
                         </th>
-                        <th class="p-4 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('nik')">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('nik')">
                             NIK
                             <span class="inline-block ml-1 text-gray-300 group-hover:text-brand-blue" id="sort-nik">↓</span>
                         </th>
-                        <th class="p-4 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('nama_karyawan')">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('nama_karyawan')">
                             Nama
                             <span class="inline-block ml-1 text-gray-300 group-hover:text-brand-blue" id="sort-nama_karyawan">↓</span>
                         </th>
-                        <th class="p-4 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('id_bagian')">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('id_bagian')">
                             Bagian/Divisi
                             <span class="inline-block ml-1 text-gray-300 group-hover:text-brand-blue" id="sort-id_bagian">↓</span>
                         </th>
-                        <th class="p-4 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('status_karyawan')">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer hover:text-brand-blue group transition-colors" onclick="sortColumn('status_karyawan')">
                             Status
                             <span class="inline-block ml-1 text-gray-300 group-hover:text-brand-blue" id="sort-status_karyawan">↓</span>
                         </th>
-                        <th class="p-4">No. Telp</th>
-                        <th class="p-4 text-right">Aksi</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">No. Telp</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                <tbody class="divide-y divide-gray-200">
                     @forelse($karyawans as $karyawan)
-                    <tr class="hover:bg-blue-50/50 transition-colors duration-200 group" 
+                    <tr class="hover:bg-gray-50 transition" 
                         data-id="{{ $karyawan->id_karyawan }}" 
                         data-nik="{{ $karyawan->nik }}"
                         data-nama="{{ $karyawan->nama_karyawan }}"
@@ -101,52 +101,52 @@
                         data-bagian-nama="{{ $karyawan->Bagian->nama_bagian ?? '-' }}"
                         data-status="{{ $karyawan->status_karyawan }}"
                         data-telp="{{ $karyawan->no_telepon ?? '' }}">
-                        <td class="p-4">
+                        <td class="px-6 py-3">
                             <input type="checkbox" class="rowCheckbox w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" value="{{ $karyawan->id_karyawan }}">
                         </td>
-                        <td class="p-4 font-semibold text-brand-blue">{{ $karyawan->id_karyawan }}</td>
-                        <td class="p-4 font-medium text-gray-700">{{ $karyawan->nik }}</td>
-                        <td class="p-4 font-medium text-gray-900">{{ $karyawan->nama_karyawan }}</td>
-                        <td class="p-4">{{ $karyawan->Bagian->nama_bagian ?? '-' }}</td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 
+                        <td class="px-6 py-3 text-sm font-semibold text-brand-blue">{{ $karyawan->id_karyawan }}</td>
+                        <td class="px-6 py-3 text-sm font-medium text-gray-700">{{ $karyawan->nik }}</td>
+                        <td class="px-6 py-3 text-sm font-medium text-gray-900">{{ $karyawan->nama_karyawan }}</td>
+                        <td class="px-6 py-3 text-sm text-gray-700">{{ $karyawan->Bagian->nama_bagian ?? '-' }}</td>
+                        <td class="px-6 py-3 text-sm">
+                            <span class="inline-block px-2 py-1 text-xs rounded font-medium
                                 @if($karyawan->status_karyawan === 'Tetap') bg-green-100 text-green-700
                                 @elseif($karyawan->status_karyawan === 'Kontrak') bg-blue-100 text-blue-700
                                 @elseif($karyawan->status_karyawan === 'Cuti') bg-yellow-100 text-yellow-700
                                 @else bg-red-100 text-red-700
-                                @endif
-                                text-xs font-bold rounded-full uppercase">
+                                @endif">
                                 {{ $karyawan->status_karyawan }}
                             </span>
                         </td>
-                        <td class="p-4 text-gray-500">{{ $karyawan->no_telepon ?? '-' }}</td>
-                        <td class="p-4 text-right">
-                            <div class="flex items-center justify-end gap-3">
+                        <td class="px-6 py-3 text-sm text-gray-700">{{ $karyawan->no_telepon ?? '-' }}</td>
+                        <td class="px-6 py-3 text-center text-sm">
+                            <div class="flex items-center justify-center gap-2">
                                 <button
                                     onclick="openDetailModal('{{ $karyawan->id_karyawan }}', '{{ $karyawan->nik }}', '{{ $karyawan->nama_karyawan }}', '{{ $karyawan->Bagian->nama_bagian ?? '-' }}', '{{ $karyawan->status_karyawan }}', '{{ $karyawan->no_telepon ?? '-' }}')"
-                                    class="p-1.5 rounded-md hover:bg-blue-50 text-gray-400 hover:text-brand-blue transition-colors"
+                                    class="text-blue-600 hover:text-blue-800 font-medium"
                                     title="Lihat">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </button>
                                 <button 
                                     onclick="openEditModal('{{ $karyawan->id_karyawan }}', '{{ $karyawan->nik }}', '{{ $karyawan->nama_karyawan }}', '{{ $karyawan->id_bagian }}', '{{ $karyawan->status_karyawan }}', '{{ $karyawan->no_telepon }}')"
-                                    class="p-1.5 rounded-md hover:bg-yellow-50 text-gray-400 hover:text-brand-yellow transition-colors"
+                                    class="text-amber-600 hover:text-amber-800 font-medium"
                                     title="Edit">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
                                 <button 
                                     onclick="openDeleteModal('{{ $karyawan->id_karyawan }}', '{{ $karyawan->nama_karyawan }}')"
-                                    class="p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-brand-red transition-colors"
+                                    class="text-red-600 hover:text-red-800 font-medium"
                                     title="Hapus">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="p-8 text-center text-gray-500">
-                            Tidak ada data karyawan
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                            <p class="text-gray-500">Tidak ada data karyawan</p>
                         </td>
                     </tr>
                     @endforelse
@@ -154,7 +154,7 @@
             </table>
         </div>
 
-        <div class="bg-gray-50 border-t border-gray-200 px-4 py-4 sm:px-6">
+        <div class="bg-white-50 border-t border-white-200 px-4 py-4 sm:px-6">
             <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
                 <!-- Pagination Info dan Links -->
                 <div class="flex-1">
@@ -166,12 +166,12 @@
 
                 <!-- Per Page Dropdown -->
                 <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Tampilkan per halaman:</label>
+                    <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Tampilkan per halaman</label>
                     <select onchange="changePerPage(this.value)" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue text-sm bg-white font-medium min-w-max">
-                        <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 / page</option>
-                        <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 / page</option>
-                        <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 / page</option>
-                        <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 / page</option>
+                        <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
             </div>
