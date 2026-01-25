@@ -3,12 +3,12 @@
 @section('content')
 <div class="container mx-auto">
     
-    <div class="mb-6">
+    <!-- <div class="mb-6">
         <a href="{{ route('penjadwalan.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             Kembali ke Daftar
         </a>
-    </div>
+    </div> -->
 
     @if (session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
@@ -22,9 +22,9 @@
 
     <!-- Informasi Jadwal -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-        <div class="bg-gradient-to-r from-brand-blue to-blue-800 px-6 py-4">
-            <h1 class="text-2xl font-bold text-white">{{ $jadwal->JenisPelatihan->nama_jenis ?? '-' }}</h1>
-            <p class="text-blue-100 text-sm mt-1">Detail Jadwal Pelatihan</p>
+        <div class="bg-gradient-to-r from-brand-white to-white-800 px-6 py-4">
+            <h1 class="text-2xl font-bold text-black">{{ $jadwal->JenisPelatihan->nama_jenis ?? '-' }}</h1>
+            <p class="text-gray-500 text-sm mt-1">Detail Jadwal Pelatihan</p>
         </div>
 
         <div class="p-6">
@@ -115,7 +115,7 @@
     </div>
 
     <!-- Bagian dan Peserta -->
-    <div class="space-y-6">
+    <!-- <div class="space-y-6">
         @forelse($jadwal->JadwalBagian as $jadwalBagian)
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-blue-50 px-6 py-4 border-b border-gray-200">
@@ -175,14 +175,14 @@
                 <p class="text-gray-500">Belum ada bagian yang dipilih untuk jadwal ini</p>
             </div>
         @endforelse
-    </div>
+    </div> -->
 
     <!-- Tombol Aksi -->
     <div class="flex flex-wrap gap-3 mt-8">
         @if($jadwal->status === 'draft')
             <form action="{{ route('penjadwalan.generate-presensi', $jadwal->id_jadwal) }}" method="POST" style="display:inline;">
                 @csrf
-                <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition">
+                <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Generate Presensi
                 </button>

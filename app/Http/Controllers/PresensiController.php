@@ -154,8 +154,13 @@ class PresensiController extends Controller
             ], 403);
         }
 
-        // Hitung sisa waktu
-        $sisaWaktu = now()->diffInMinutes($jadwal->waktu_berakhir_presensi);
+        // Hitung sisa waktu dalam menit dan detik
+        $sisaMenit = now()->diffInSeconds($jadwal->waktu_berakhir_presensi);
+        
+        // Convert to MM:SS format
+        $menit = intdiv($sisaMenit, 60);
+        $detik = $sisaMenit % 60;
+        $formatSisaWaktu = str_pad($menit, 2, '0', STR_PAD_LEFT) . ':' . str_pad($detik, 2, '0', STR_PAD_LEFT);
 
         return response()->json([
             'success' => true,
@@ -166,7 +171,8 @@ class PresensiController extends Controller
                 'jam_mulai' => $jadwal->jam_mulai->format('H:i'),
                 'jam_selesai' => $jadwal->jam_selesai->format('H:i'),
                 'tempat' => $jadwal->tempat,
-                'sisa_waktu' => $sisaWaktu . ' menit',
+                'sisa_waktu' => $formatSisaWaktu,
+                'waktu_berakhir_presensi' => $jadwal->waktu_berakhir_presensi->toIso8601String(),
                 'location_latitude' => self::OFFICE_LATITUDE,
                 'location_longitude' => self::OFFICE_LONGITUDE,
                 'location_radius' => self::OFFICE_RADIUS,

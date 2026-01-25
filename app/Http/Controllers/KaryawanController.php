@@ -234,35 +234,75 @@ class KaryawanController extends Controller
     public function importExcel(Request $request)
     {
         try {
+            // Custom validation untuk file upload dengan MIME type yang lebih fleksibel
             $request->validate([
-                'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120', // max 5MB
+                'excel_file' => 'required|file|max:5120', // max 5MB
+            ], [
+                'excel_file.required' => 'File harus dipilih',
+                'excel_file.file' => 'Input harus berupa file',
+                'excel_file.max' => 'Ukuran file maksimal 5MB',
             ]);
 
             $file = $request->file('excel_file');
-            $path = $file->store('temp');
             
-            // Load file menggunakan SimpleXLSX atau CSV reader
-            $filePath = storage_path('app/' . $path);
+            // Validasi extension file
+            $allowedExtensions = ['csv', 'xls', 'xlsx'];
+            $fileExtension = strtolower($file->getClientOriginalExtension());
+            
+            if (!in_array($fileExtension, $allowedExtensions)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Format file tidak didukung. Gunakan CSV, XLS, atau XLSX.'
+                ], 422);
+            }
+            
             $data = [];
             
-            if ($file->getClientOriginalExtension() === 'csv') {
-                // Parse CSV
+            if ($fileExtension === 'csv') {
+                // Parse CSV menggunakan getRealPath()
+                $filePath = $file->getRealPath();
+                
                 if (($handle = fopen($filePath, 'r')) !== false) {
                     $header = fgetcsv($handle);
                     while (($row = fgetcsv($handle)) !== false) {
+                        // Skip empty rows
                         if (!empty(array_filter($row))) {
                             $data[] = array_combine($header, $row);
                         }
                     }
                     fclose($handle);
                 }
-            } else {
-                // Parse Excel menggunakan built-in PHP functions
-                // Untuk Excel, gunakan library atau custom parser
-                // Untuk sekarang, return error jika tidak CSV
+            } elseif ($fileExtension === 'xlsx') {
+                // Parse XLSX - simpan temp dulu karena ZipArchive perlu file path
+                $tempPath = $file->storeAs('temp', uniqid() . '.xlsx');
+                $filePath = storage_path('app' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $tempPath));
+                
+                if (!file_exists($filePath)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Gagal menyimpan file sementara. Periksa permission folder storage/app.'
+                    ], 422);
+                }
+                
+                // Parse XLSX (ZIP format)
+                $data = $this->parseXLSX($filePath);
+                if ($data === false) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Gagal membaca file XLSX. Pastikan file tidak rusak.'
+                    ], 422);
+                }
+                
+                // Delete temp file
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            } elseif ($fileExtension === 'xls') {
+                // XLS format memerlukan library khusus
+                // Untuk sekarang, minta user convert ke CSV atau XLSX
                 return response()->json([
                     'success' => false,
-                    'message' => 'Saat ini hanya CSV yang didukung. Silakan convert Excel ke CSV terlebih dahulu.'
+                    'message' => 'Format XLS tidak didukung. Silakan convert ke format CSV atau XLSX terlebih dahulu.\n\nCara: Buka file XLS dengan Excel → Save As → Format CSV UTF-8 atau XLSX.'
                 ], 422);
             }
 
@@ -305,9 +345,6 @@ class KaryawanController extends Controller
                 }
             }
 
-            // Delete temp file
-            \Storage::delete($path);
-
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
@@ -334,6 +371,92 @@ class KaryawanController extends Controller
             }
 
             return redirect()->back()->with('error', 'Gagal mengimpor file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Parse XLSX file menggunakan built-in ZIP functions
+     */
+    private function parseXLSX($filePath)
+    {
+        try {
+            $zip = new \ZipArchive();
+            
+            if ($zip->open($filePath) !== true) {
+                return false;
+            }
+            
+            // Read the main worksheet XML
+            $xml = $zip->getFromName('xl/worksheets/sheet1.xml');
+            
+            if ($xml === false) {
+                $zip->close();
+                return false;
+            }
+            
+            // Read shared strings for cell values
+            $sharedStrings = [];
+            $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
+            
+            if ($sharedStringsXml !== false) {
+                $sharedStringsDoc = new \SimpleXMLElement($sharedStringsXml);
+                foreach ($sharedStringsDoc->si as $si) {
+                    $sharedStrings[] = (string)$si->t;
+                }
+            }
+            
+            $zip->close();
+            
+            // Parse worksheet XML
+            $worksheet = new \SimpleXMLElement($xml);
+            
+            // Register namespaces
+            $worksheet->registerXPathNamespace('main', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
+            
+            $rows = $worksheet->xpath('//main:row');
+            $data = [];
+            $header = null;
+            
+            foreach ($rows as $rowIndex => $row) {
+                $rowData = [];
+                $cells = $row->xpath('./main:c');
+                
+                foreach ($cells as $cell) {
+                    $cellValue = '';
+                    
+                    // Get cell type
+                    $cellType = (string)$cell->attributes()->t;
+                    
+                    if ($cellType === 's') {
+                        // Shared string reference
+                        $stringIndex = (int)(string)$cell->v;
+                        $cellValue = $sharedStrings[$stringIndex] ?? '';
+                    } elseif (!empty($cell->v)) {
+                        // Direct value
+                        $cellValue = (string)$cell->v;
+                    }
+                    
+                    $rowData[] = $cellValue;
+                }
+                
+                // Skip empty rows
+                if (empty(array_filter($rowData))) {
+                    continue;
+                }
+                
+                // First row is header
+                if ($header === null) {
+                    $header = $rowData;
+                } else {
+                    // Combine header with row data
+                    $data[] = array_combine($header, $rowData);
+                }
+            }
+            
+            return $data;
+        } catch (\Exception $e) {
+            \Log::error('XLSX Parse Error: ' . $e->getMessage());
+            return false;
         }
     }
 }

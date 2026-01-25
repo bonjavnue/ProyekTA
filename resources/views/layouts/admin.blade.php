@@ -174,7 +174,23 @@
         <div class="flex-1 flex flex-col overflow-hidden relative">
             
             <header class="flex items-center justify-between h-16 bg-white px-6 border-b border-gray-200 shadow-sm z-10">
-                <div class="text-gray-500 text-sm font-medium">Admin / <span class="text-brand-blue">{{ $headerTitle ?? 'Dashboard' }}</span></div>
+                <div class="text-sm font-medium flex items-center space-x-2">
+                    @forelse($breadcrumbs as $index => $breadcrumb)
+                        @if($breadcrumb['url'])
+                            <a href="{{ $breadcrumb['url'] }}" class="text-gray-500 hover:text-brand-blue transition-colors">
+                                {{ $breadcrumb['label'] }}
+                            </a>
+                        @else
+                            <span class="text-brand-blue font-semibold">{{ $breadcrumb['label'] }}</span>
+                        @endif
+                        
+                        @if($index < count($breadcrumbs) - 1)
+                            <span class="text-gray-300">&gt;</span>
+                        @endif
+                    @empty
+                        <span class="text-brand-blue font-semibold">Dashboard</span>
+                    @endforelse
+                </div>
 
                 <div class="flex items-center space-x-4" x-data="{ open: false }">
                     <div class="relative">

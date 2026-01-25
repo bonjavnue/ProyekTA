@@ -5,11 +5,11 @@
     
     <!-- Header dengan Back Button -->
     <div class="mb-6 flex items-center gap-4">
-        <a href="{{ route('kehadiran.index') }}" class="p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-all">
+        <!-- <a href="{{ route('kehadiran.index') }}" class="p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-all">
             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
-        </a>
+        </a> -->
         <div>
             <h1 class="text-2xl font-bold text-gray-800">{{ $jadwal->JenisPelatihan->nama_jenis }}</h1>
             <p class="text-sm text-gray-500">
@@ -96,7 +96,7 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Tanggal</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Waktu Presensi</th>
                         <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700">Status</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700">Dicatat Oleh</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">

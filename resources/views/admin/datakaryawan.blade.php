@@ -192,7 +192,7 @@
             <div class="mb-4">
                 <label for="id_karyawan" class="block text-sm font-medium text-gray-700 mb-2">ID Karyawan *</label>
                 <input 
-                    type="number" 
+                    type="text" 
                     id="id_karyawan" 
                     name="id_karyawan" 
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
@@ -412,63 +412,63 @@
 
 <!-- Modal Detail Karyawan -->
 <div id="detailKaryawanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full animate-fade-in">
-        <div class="bg-gradient-to-r from-brand-blue to-blue-900 px-6 py-4 rounded-t-lg flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white">Detail Karyawan</h2>
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-bold text-gray-800">Detail Karyawan</h2>
         </div>
         
-        <div class="p-6">
-            <div class="mb-4">
+        <div class="p-6 space-y-4">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">ID Karyawan</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-gray-800 font-semibold" id="detail_id_karyawan">-</p>
                 </div>
             </div>
 
-            <div class="mb-4">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">NIK</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-gray-800 font-semibold" id="detail_nik">-</p>
                 </div>
             </div>
 
-            <div class="mb-4">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Nama Karyawan</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-gray-800 font-semibold" id="detail_nama_karyawan">-</p>
                 </div>
             </div>
 
-            <div class="mb-4">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Bagian/Divisi</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-gray-800" id="detail_bagian">-</p>
                 </div>
             </div>
 
-            <div class="mb-4">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-gray-800" id="detail_status">-</p>
                 </div>
             </div>
 
-            <div class="mb-6">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-gray-800" id="detail_no_telepon">-</p>
                 </div>
             </div>
+        </div>
 
-            <div class="flex gap-3 justify-end">
-                <button 
-                    type="button" 
-                    onclick="closeDetailModal()"
-                    class="px-4 py-2 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium"
-                >
-                    Tutup
-                </button>
-            </div>
+        <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
+            <button 
+                type="button" 
+                onclick="closeDetailModal()"
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium text-sm"
+            >
+                Tutup
+            </button>
         </div>
     </div>
 </div>
@@ -553,15 +553,21 @@
                 >
                 <p class="text-xs text-gray-500 mt-2">Format: CSV, XLS, atau XLSX (Max 5MB)</p>
                 <p class="text-xs text-gray-600 mt-2"><strong>Format CSV:</strong> id_karyawan, nik, nama_karyawan, id_bagian, status_karyawan, no_telepon</p>
+                <!-- <p class="text-xs text-orange-600 mt-2"><strong>📝 Catatan:</strong></p>
+                <ul class="text-xs text-orange-600 list-disc list-inside">
+                    <li>Format CSV dan XLSX didukung penuh</li>
+                    <li>Format XLS: Convert ke CSV atau XLSX terlebih dahulu</li>
+                    <li>Pastikan file memiliki extension yang benar (.csv, .xls, atau .xlsx)</li>
+                </ul> -->
                 <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
             </div>
 
-            <div class="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <!-- <div class="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p class="text-xs text-blue-800">
                     <strong>Catatan:</strong> Pastikan file CSV Anda memiliki header sesuai format di atas. 
                     <a href="#" class="text-blue-600 underline" onclick="downloadTemplate(event)">Download template CSV</a>
                 </p>
-            </div>
+            </div> -->
 
             <div class="flex gap-3 justify-end">
                 <button 
@@ -1184,6 +1190,32 @@
     // === IMPORT EXCEL FORM ===
     formImport.addEventListener('submit', async function(e) {
         e.preventDefault();
+
+        const fileInput = document.getElementById('excel_file');
+        const file = fileInput.files[0];
+        
+        // Validasi file dipilih
+        if (!file) {
+            alert('Pilih file terlebih dahulu');
+            return;
+        }
+        
+        // Validasi extension file
+        const allowedExtensions = ['csv', 'xls', 'xlsx'];
+        const fileName = file.name.toLowerCase();
+        const fileExtension = fileName.split('.').pop();
+        
+        if (!allowedExtensions.includes(fileExtension)) {
+            alert(`Format file tidak valid!\n\nFile: ${file.name}\nExtension: .${fileExtension}\n\nGunakan file dengan extension: .csv, .xls, atau .xlsx`);
+            return;
+        }
+        
+        // Validasi ukuran file (5MB = 5120KB)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            alert(`Ukuran file terlalu besar!\n\nUkuran: ${(file.size / 1024 / 1024).toFixed(2)}MB\nMaksimal: 5MB`);
+            return;
+        }
 
         const importSubmitBtn = document.getElementById('importSubmitBtn');
         importSubmitBtn.disabled = true;

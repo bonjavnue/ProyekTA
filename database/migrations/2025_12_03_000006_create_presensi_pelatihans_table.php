@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('presensi_pelatihans', function (Blueprint $table) {
             $table->id('id_presensi');
             $table->unsignedBigInteger('id_jadwal');
-            $table->unsignedBigInteger('id_karyawan');
+            $table->string('id_karyawan');
             $table->string('status_kehadiran')->nullable();
             $table->dateTime('waktu_presensi')->nullable();
             $table->string('bukti_kehadiran')->nullable();

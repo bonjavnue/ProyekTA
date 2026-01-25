@@ -144,52 +144,62 @@
 </div>
 
 <!-- Modal Tambah Pelatihan -->
-<div id="tambahPelatihanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full animate-fade-in">
-        <div class="bg-gradient-to-r from-brand-blue to-blue-900 px-6 py-4 rounded-t-lg">
-            <h2 class="text-xl font-bold text-white">Tambah Jenis Pelatihan</h2>
+<div id="tambahPelatihanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-container">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 modal-content">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Tambah Jenis Pelatihan</h2>
+                <p class="text-sm text-gray-500 mt-1">Isi form di bawah untuk menambah jenis pelatihan baru</p>
+            </div>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
         
         <form id="formTambahPelatihan" class="p-6">
             @csrf
             
-            <div class="mb-4">
-                <label for="nama_jenis" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelatihan</label>
-                <input 
-                    type="text" 
-                    id="nama_jenis" 
-                    name="nama_jenis" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="Contoh: Leadership & Management"
-                    required
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="nama_jenis" class="block text-sm font-semibold text-gray-900 mb-3">Nama Pelatihan *</label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="nama_jenis" 
+                            name="nama_jenis" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition bg-white"
+                            placeholder="Contoh: Leadership & Management"
+                            required
+                        >
+                        <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="deskripsi" class="block text-sm font-semibold text-gray-900 mb-3">Deskripsi *</label>
+                    <textarea 
+                        id="deskripsi" 
+                        name="deskripsi" 
+                        rows="5"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition resize-none bg-white"
+                        placeholder="Masukkan deskripsi lengkap pelatihan (tujuan, konten, manfaat, dll)..."
+                        required
+                    ></textarea>
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
             </div>
 
-            <div class="mb-6">
-                <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                <textarea 
-                    id="deskripsi" 
-                    name="deskripsi" 
-                    rows="4"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition resize-none"
-                    placeholder="Masukkan deskripsi pelatihan..."
-                    required
-                ></textarea>
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="flex gap-3 justify-end">
+            <div class="flex gap-3 justify-end pt-6 border-t border-gray-200 mt-6">
                 <button 
                     type="button" 
                     onclick="closeModal()"
-                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                    class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
                 >
                     Batal
                 </button>
                 <button 
                     type="submit" 
-                    class="px-4 py-2 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium flex items-center gap-2"
+                    class="px-6 py-2.5 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
                     id="submitBtn"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -201,19 +211,73 @@
 </div>
 
 <style>
-    @keyframes fadeIn {
+    /* Modal Backdrop Animation */
+    @keyframes backdropFadeIn {
         from {
             opacity: 0;
-            transform: scale(0.95);
         }
         to {
             opacity: 1;
-            transform: scale(1);
         }
     }
-    
-    .animate-fade-in {
-        animation: fadeIn 0.3s ease-out;
+
+    @keyframes backdropFadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+
+    /* Modal Content Animation */
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    @keyframes modalSlideOut {
+        from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+    }
+
+    /* Modal Container */
+    .modal-container {
+        animation: backdropFadeIn 0.3s ease-out forwards;
+    }
+
+    .modal-container.closing {
+        animation: backdropFadeOut 0.3s ease-out forwards;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .modal-container.closing .modal-content {
+        animation: modalSlideOut 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    /* Smooth transitions untuk input/textarea */
+    input, textarea, select {
+        transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        transition: all 0.2s ease;
     }
 </style>
 
@@ -223,22 +287,30 @@
 
     function openModal() {
         modal.classList.remove('hidden');
+        // Trigger animation
+        setTimeout(() => {
+            modal.classList.remove('closing');
+        }, 10);
         document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
-        modal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        form.reset();
-        clearErrors();
+        modal.classList.add('closing');
+        // Wait for animation to complete
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            form.reset();
+            clearErrors();
+        }, 300);
     }
 
     // Close modal saat klik di luar form
-    // modal.addEventListener('click', function(e) {
-    //     if (e.target === modal) {
-    //         closeModal();
-    //     }
-    // });
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
 
     // Close modal saat tekan ESC
     document.addEventListener('keydown', function(e) {
@@ -655,10 +727,16 @@
 </script>
 
 <!-- Modal Edit Pelatihan -->
-<div id="editPelatihanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full animate-fade-in">
-        <div class="bg-gradient-to-r from-brand-blue to-blue-900 px-6 py-4 rounded-t-lg">
-            <h2 class="text-xl font-bold text-white">Edit Jenis Pelatihan</h2>
+<div id="editPelatihanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-container">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 modal-content">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Edit Jenis Pelatihan</h2>
+                <p class="text-sm text-gray-500 mt-1">Ubah informasi jenis pelatihan</p>
+            </div>
+            <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
         
         <form id="formEditPelatihan" class="p-6">
@@ -666,43 +744,47 @@
             
             <input type="hidden" id="edit_id_jenis" name="edit_id_jenis">
             
-            <div class="mb-4">
-                <label for="edit_nama_jenis" class="block text-sm font-medium text-gray-700 mb-2">Nama Pelatihan</label>
-                <input 
-                    type="text" 
-                    id="edit_nama_jenis" 
-                    name="nama_jenis" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="Contoh: Leadership & Management"
-                    required
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="edit_nama_jenis" class="block text-sm font-semibold text-gray-900 mb-3">Nama Pelatihan *</label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="edit_nama_jenis" 
+                            name="nama_jenis" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition bg-white"
+                            placeholder="Contoh: Leadership & Management"
+                            required
+                        >
+                        <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="edit_deskripsi" class="block text-sm font-semibold text-gray-900 mb-3">Deskripsi *</label>
+                    <textarea 
+                        id="edit_deskripsi" 
+                        name="deskripsi" 
+                        rows="5"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition resize-none bg-white"
+                        placeholder="Masukkan deskripsi lengkap pelatihan..."
+                        required
+                    ></textarea>
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
             </div>
 
-            <div class="mb-6">
-                <label for="edit_deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                <textarea 
-                    id="edit_deskripsi" 
-                    name="deskripsi" 
-                    rows="4"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition resize-none"
-                    placeholder="Masukkan deskripsi pelatihan..."
-                    required
-                ></textarea>
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="flex gap-3 justify-end">
+            <div class="flex gap-3 justify-end pt-6 border-t border-gray-200 mt-6">
                 <button 
                     type="button" 
                     onclick="closeEditModal()"
-                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                    class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
                 >
                     Batal
                 </button>
                 <button 
                     type="submit" 
-                    class="px-4 py-2 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium flex items-center gap-2"
+                    class="px-6 py-2.5 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
                     id="editSubmitBtn"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -722,15 +804,30 @@
         document.getElementById('edit_nama_jenis').value = namaJenis;
         document.getElementById('edit_deskripsi').value = deskripsi;
         editModal.classList.remove('hidden');
+        // Trigger animation
+        setTimeout(() => {
+            editModal.classList.remove('closing');
+        }, 10);
         document.body.style.overflow = 'hidden';
     }
 
     function closeEditModal() {
-        editModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        editForm.reset();
-        clearEditErrors();
+        editModal.classList.add('closing');
+        // Wait for animation to complete
+        setTimeout(() => {
+            editModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            editForm.reset();
+            clearEditErrors();
+        }, 300);
     }
+
+    // Close modal saat klik di luar form
+    editModal.addEventListener('click', function(e) {
+        if (e.target === editModal) {
+            closeEditModal();
+        }
+    });
 
     // Close modal saat tekan ESC
     document.addEventListener('keydown', function(e) {
@@ -800,42 +897,43 @@
 </script>
 
 <!-- Modal Konfirmasi Hapus -->
-<div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-sm w-full animate-fade-in">
-        <div class="bg-red-50 px-6 py-4 border-b border-red-200 rounded-t-lg">
+<div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-container">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 modal-content">
+        <div class="p-6 border-b border-red-200">
             <h2 class="text-lg font-bold text-red-900">Hapus Jenis Pelatihan</h2>
+            <p class="text-sm text-red-700 mt-1">Tindakan ini tidak dapat dibatalkan</p>
         </div>
         
-        <div class="p-6">
-            <p class="text-gray-700 mb-2">
+        <div class="p-6 space-y-4">
+            <p class="text-gray-700">
                 Apakah Anda yakin ingin menghapus jenis pelatihan berikut?
             </p>
-            <p class="text-lg font-semibold text-gray-900 mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <p class="text-lg font-semibold text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <span id="deleteItemName"></span>
             </p>
-            <p class="text-sm text-gray-600 mb-6">
-                <svg class="w-5 h-5 inline text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                Tindakan ini tidak dapat dibatalkan.
+            <p class="text-sm text-amber-700 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                <span>Data yang dihapus tidak dapat dipulihkan.</span>
             </p>
+        </div>
 
-            <div class="flex gap-3 justify-end">
-                <button 
-                    type="button" 
-                    onclick="closeDeleteModal()"
-                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
-                >
-                    Batal
-                </button>
-                <button 
-                    type="button" 
-                    onclick="confirmDelete()"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium flex items-center gap-2"
-                    id="deleteConfirmBtn"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    <span>Ya, Hapus</span>
-                </button>
-            </div>
+        <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
+            <button 
+                type="button" 
+                onclick="closeDeleteModal()"
+                class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
+            >
+                Batal
+            </button>
+            <button 
+                type="button" 
+                onclick="confirmDelete()"
+                class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
+                id="deleteConfirmBtn"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <span>Ya, Hapus</span>
+            </button>
         </div>
     </div>
 </div>
@@ -848,14 +946,29 @@
         deleteIdJenis = idJenis;
         document.getElementById('deleteItemName').textContent = namaJenis;
         deleteModal.classList.remove('hidden');
+        // Trigger animation
+        setTimeout(() => {
+            deleteModal.classList.remove('closing');
+        }, 10);
         document.body.style.overflow = 'hidden';
     }
 
     function closeDeleteModal() {
-        deleteModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        deleteIdJenis = null;
+        deleteModal.classList.add('closing');
+        // Wait for animation to complete
+        setTimeout(() => {
+            deleteModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            deleteIdJenis = null;
+        }, 300);
     }
+
+    // Close modal saat klik di luar form
+    deleteModal.addEventListener('click', function(e) {
+        if (e.target === deleteModal) {
+            closeDeleteModal();
+        }
+    });
 
     // Close modal saat tekan ESC
     document.addEventListener('keydown', function(e) {
@@ -905,49 +1018,49 @@
 </script>
 
 <!-- Modal Detail Pelatihan -->
-<div id="detailPelatihanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full animate-fade-in">
-        <div class="bg-gradient-to-r from-brand-blue to-blue-900 px-6 py-4 rounded-t-lg flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white">Detail Jenis Pelatihan</h2>
-            <!-- <button 
-                onclick="closeDetailModal()"
-                class="text-white hover:text-gray-200 transition"
-            >
+<div id="detailPelatihanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-container">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 modal-content">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Detail Jenis Pelatihan</h2>
+                <p class="text-sm text-gray-500 mt-1">Informasi lengkap pelatihan</p>
+            </div>
+            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button> -->
+            </button>
         </div>
         
-        <div class="p-6">
-            <div class="mb-6">
+        <div class="p-6 space-y-4">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">ID Jenis Pelatihan</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-800 font-semibold" id="detail_id_jenis">-</p>
+                    <p class="text-gray-800 font-semibold text-sm" id="detail_id_jenis">-</p>
                 </div>
             </div>
 
-            <div class="mb-6">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pelatihan</label>
                 <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-gray-800 font-semibold" id="detail_nama_jenis">-</p>
                 </div>
             </div>
 
-            <div class="mb-6">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 max-h-40 overflow-y-auto">
-                    <p class="text-gray-800 whitespace-pre-wrap" id="detail_deskripsi">-</p>
+                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                    <p class="text-gray-800 whitespace-pre-wrap text-sm leading-relaxed" id="detail_deskripsi">-</p>
                 </div>
             </div>
+        </div>
 
-            <div class="flex gap-3 justify-end">
-                <button 
-                    type="button" 
-                    onclick="closeDetailModal()"
-                    class="px-4 py-2 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium"
-                >
-                    Tutup
-                </button>
-            </div>
+        <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
+            <button 
+                type="button" 
+                onclick="closeDetailModal()"
+                class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium text-sm"
+            >
+                Tutup
+            </button>
         </div>
     </div>
 </div>
@@ -960,13 +1073,28 @@
         document.getElementById('detail_nama_jenis').textContent = namaJenis;
         document.getElementById('detail_deskripsi').textContent = deskripsi || '-';
         detailModal.classList.remove('hidden');
+        // Trigger animation
+        setTimeout(() => {
+            detailModal.classList.remove('closing');
+        }, 10);
         document.body.style.overflow = 'hidden';
     }
 
     function closeDetailModal() {
-        detailModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
+        detailModal.classList.add('closing');
+        // Wait for animation to complete
+        setTimeout(() => {
+            detailModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }, 300);
     }
+
+    // Close modal saat klik di luar form
+    detailModal.addEventListener('click', function(e) {
+        if (e.target === detailModal) {
+            closeDetailModal();
+        }
+    });
 
     // Close modal saat tekan ESC
     document.addEventListener('keydown', function(e) {

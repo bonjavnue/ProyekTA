@@ -10,7 +10,7 @@ class Karyawan extends Model
     protected $table = 'karyawans';
     protected $primaryKey = 'id_karyawan';
     public $incrementing = false; // ID tidak auto-increment
-    protected $keyType = 'int'; // Tetap integer tapi tidak auto-increment
+    protected $keyType = 'string'; // String type untuk id_karyawan
 
     protected $fillable = [
         'id_karyawan',
