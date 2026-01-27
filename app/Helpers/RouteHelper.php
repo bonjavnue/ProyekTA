@@ -29,6 +29,11 @@ class RouteHelper
             'supervisor.index' => 'Kelola Supervisor',
             'bagian.index' => 'Kelola Bagian',
             'admin.index' => 'Kelola Admin',
+            
+            // Supervisor routes
+            'supervisor.kehadiran.index' => 'Kehadiran Pelatihan',
+            'supervisor.kehadiran.show' => 'Detail Kehadiran',
+            'supervisor.kehadiran.export' => 'Export Kehadiran',
         ];
         
         return $titles[$routeName] ?? 'Admin Panel';
@@ -100,6 +105,22 @@ class RouteHelper
             'admin.index' => [
                 ['label' => 'Admin', 'url' => route('dashboard')],
                 ['label' => 'Kelola Admin', 'url' => null]
+            ],
+            
+            // Supervisor routes
+            'supervisor.kehadiran.index' => [
+                ['label' => 'Supervisor', 'url' => route('dashboard')],
+                ['label' => 'Kehadiran Pelatihan', 'url' => null]
+            ],
+            'supervisor.kehadiran.show' => [
+                ['label' => 'Supervisor', 'url' => route('dashboard')],
+                ['label' => 'Kehadiran Pelatihan', 'url' => route('supervisor.kehadiran.index')],
+                ['label' => 'Detail', 'url' => null]
+            ],
+            'supervisor.kehadiran.export' => [
+                ['label' => 'Supervisor', 'url' => route('dashboard')],
+                ['label' => 'Kehadiran Pelatihan', 'url' => route('supervisor.kehadiran.index')],
+                ['label' => 'Export', 'url' => null]
             ],
         ];
         

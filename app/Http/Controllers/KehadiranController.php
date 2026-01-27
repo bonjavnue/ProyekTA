@@ -52,16 +52,27 @@ class KehadiranController extends Controller
         // Map data untuk kehadiran info
         $jadwalsMapped = $jadwals->getCollection()->map(function ($jadwal) use ($currentUser) {
             // Hitung total karyawan seharusnya hadir
-            $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+            // Untuk supervisor, hanya hitung karyawan dari bagian supervisor tersebut
+            if ($currentUser->role === 'supervisor') {
+                $supervisorBagian = Bagian::where('email', $currentUser->email)->first();
+                $bagianIds = $supervisorBagian ? [$supervisorBagian->id_bagian] : [];
+            } else {
+                // Admin: hitung semua bagian dalam jadwal
+                $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+            }
+            
             $totalKaryawan = Karyawan::whereIn('id_bagian', $bagianIds)->count();
             
             // Hitung yang sudah hadir
+            $karyawanIds = Karyawan::whereIn('id_bagian', $bagianIds)->pluck('id_karyawan')->toArray();
             $hadirCount = PresensiPelatihan::where('id_jadwal', $jadwal->id_jadwal)
                 ->where('status_kehadiran', 'Hadir')
+                ->whereIn('id_karyawan', $karyawanIds)
                 ->count();
             
             // Hitung total yang punya record presensi
             $totalPresensi = PresensiPelatihan::where('id_jadwal', $jadwal->id_jadwal)
+                ->whereIn('id_karyawan', $karyawanIds)
                 ->distinct('id_karyawan')
                 ->count();
             
@@ -108,7 +119,9 @@ class KehadiranController extends Controller
             ];
         })->values();
         
-        return view('admin.kehadiran', compact('jadwals', 'jadwalsForJs', 'perPage'));
+        // Determine view based on route
+        $view = request()->route()->getName() === 'supervisor.kehadiran.index' ? 'supervisor.kehadiran' : 'admin.kehadiran';
+        return view($view, compact('jadwals', 'jadwalsForJs', 'perPage'));
     }
     
     // Detail jadwal + semua karyawan + status mereka
@@ -166,7 +179,9 @@ class KehadiranController extends Controller
         
         $perPage = request('per_page', 10);
         
-        return view('admin.kehadiran-detail', compact('jadwal', 'karyawans', 'perPage'));
+        // Determine view based on route
+        $view = request()->route()->getName() === 'supervisor.kehadiran.show' ? 'supervisor.kehadiran-detail' : 'admin.kehadiran-detail';
+        return view($view, compact('jadwal', 'karyawans', 'perPage'));
     }
     
     // Update status kehadiran (admin/supervisor mengubah status)
@@ -269,16 +284,27 @@ class KehadiranController extends Controller
         }
         
         $jadwals = $query->orderBy('tanggal_pelaksanaan', 'desc')->get()
-            ->map(function ($jadwal) {
+            ->map(function ($jadwal) use ($currentUser) {
                 // Hitung statistik kehadiran
-                $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+                // Untuk supervisor, hanya hitung karyawan dari bagian supervisor tersebut
+                if ($currentUser->role === 'supervisor') {
+                    $supervisorBagian = Bagian::where('email', $currentUser->email)->first();
+                    $bagianIds = $supervisorBagian ? [$supervisorBagian->id_bagian] : [];
+                } else {
+                    // Admin: hitung semua bagian dalam jadwal
+                    $bagianIds = $jadwal->JadwalBagian->pluck('id_bagian')->toArray();
+                }
+                
                 $totalKaryawan = Karyawan::whereIn('id_bagian', $bagianIds)->count();
                 
+                $karyawanIds = Karyawan::whereIn('id_bagian', $bagianIds)->pluck('id_karyawan')->toArray();
                 $hadirCount = PresensiPelatihan::where('id_jadwal', $jadwal->id_jadwal)
                     ->where('status_kehadiran', 'Hadir')
+                    ->whereIn('id_karyawan', $karyawanIds)
                     ->count();
                 
                 $totalPresensi = PresensiPelatihan::where('id_jadwal', $jadwal->id_jadwal)
+                    ->whereIn('id_karyawan', $karyawanIds)
                     ->distinct('id_karyawan')
                     ->count();
                 

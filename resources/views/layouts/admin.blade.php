@@ -34,8 +34,8 @@
 
         <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="flex-shrink-0 flex flex-col transition-all duration-300 bg-brand-blue text-white shadow-xl z-20">
             <div class="h-16 flex items-center justify-center border-b border-white/10">
-                <span x-show="sidebarOpen" class="text-xl font-bold tracking-wider text-white">MY APP</span>
-                <span x-show="!sidebarOpen" class="text-xl font-bold text-brand-yellow">M</span>
+                <span x-show="sidebarOpen" class="text-xl font-bold tracking-wider text-white">PPK</span>
+                <span x-show="!sidebarOpen" class="text-xl font-bold text-brand-yellow">P</span>
             </div>
 
             <nav class="flex-1 overflow-y-auto py-4 scrollbar-hide">
@@ -72,8 +72,8 @@
                             ],
                             [
                                 'name' => 'Kehadiran', 
-                                'route' => route('kehadiran.index'),
-                                'active' => request()->routeIs('kehadiran.*'),
+                                'route' => auth()->user()->role === 'supervisor' ? route('supervisor.kehadiran.index') : route('kehadiran.index'),
+                                'active' => auth()->user()->role === 'supervisor' ? request()->routeIs('supervisor.kehadiran.*') : request()->routeIs('kehadiran.*'),
                                 'path' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                                 'roles' => ['admin', 'supervisor']  // Both can see
                             ],
@@ -219,7 +219,7 @@
 
             <footer class="bg-white border-t border-gray-200 p-4 text-center">
                 <p class="text-sm text-gray-500">
-                    &copy; {{ date('Y') }} - <span class="font-bold text-brand-blue">Nama Karyawan</span>
+                    &copy; {{ date('Y') }} - <span class="font-bold text-brand-blue">PT GLORY INDUSTRIAL SEMARANG</span>
                 </p>
             </footer>
 

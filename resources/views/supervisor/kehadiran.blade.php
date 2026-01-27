@@ -15,10 +15,6 @@
 
 <div x-data="kehadiranLiveSearch()" class="container mx-auto">    
 
-    <!-- <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-800">Manajemen Kehadiran</h2>
-        <p class="text-gray-500 mt-1">Pilih jadwal pelatihan untuk mengelola kehadiran karyawan.</p>
-    </div> -->
     <div class="mb-6"> <h2 class="text-2xl font-bold text-gray-800">Manajemen Kehadiran</h2> <p class="text-gray-500 text-sm mt-1">Pilih jadwal pelatihan untuk mengelola kehadiran karyawan.</p>
 </div>
 
@@ -36,16 +32,15 @@
 
         <!-- Date Range -->
         <div class="flex flex-col gap-4 flex-1">
-            <!-- <label class="text-sm font-semibold text-gray-700">Rentang Tanggal</label> -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 block mb-1">Dari Tanggal</label>
+                    <label class="text-xs text-gray-600 block mb-1">Dari Tanggal</label>
                     <input type="date" 
                            x-model="dateFrom"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none text-sm" />
                 </div>
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 block mb-1">Sampai Tanggal</label>
+                    <label class="text-xs text-gray-600 block mb-1">Sampai Tanggal</label>
                     <input type="date" 
                            x-model="dateTo"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none text-sm" />
@@ -55,21 +50,16 @@
 
         <!-- Export Button -->
         <!-- <button @click="openExportModal()"
-                class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/20 transition-all w-full lg:w-auto whitespace-nowrap">
-            <span class="material-symbols-outlined text-[20px]">file_download</span>
-            Export Laporan
-        </button> -->
-        <button @click="openExportModal()"
                 class="flex items-center justify-center gap-2 bg-brand-blue hover:bg-blue-900 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 w-full lg:w-auto whitespace-nowrap">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span>Export Laporan</span>
-        </button>
+        </button> -->
     </div>
 
     <!-- Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <template x-for="jadwal in filteredJadwals" :key="jadwal.id_jadwal">
-            <a :href="`{{ url('admin/kehadiran') }}/${jadwal.id_jadwal}`"
+            <a :href="`{{ url('supervisor/kehadiran') }}/${jadwal.id_jadwal}`"
                class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col border border-gray-100">
                 <!-- Card Content -->
                 <div class="p-6 flex-1">

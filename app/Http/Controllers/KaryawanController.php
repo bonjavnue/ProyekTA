@@ -66,7 +66,7 @@ class KaryawanController extends Controller
     {
         try {
             $validated = $request->validate([
-                'id_karyawan' => 'required|integer|unique:karyawans,id_karyawan',
+                'id_karyawan' => 'required|string|unique:karyawans,id_karyawan',
                 'nik' => 'required|string|unique:karyawans,nik|max:20',
                 'nama_karyawan' => 'required|string|max:255',
                 'id_bagian' => 'required|exists:bagian,id_bagian',
@@ -126,6 +126,7 @@ class KaryawanController extends Controller
             $karyawan = Karyawan::findOrFail($id);
 
             $validated = $request->validate([
+                'id_karyawan' => 'required|string|unique:karyawans,id_karyawan,' . $id . ',id_karyawan|max:50',
                 'nik' => 'required|string|unique:karyawans,nik,' . $id . ',id_karyawan|max:20',
                 'nama_karyawan' => 'required|string|max:255',
                 'id_bagian' => 'required|exists:bagian,id_bagian',

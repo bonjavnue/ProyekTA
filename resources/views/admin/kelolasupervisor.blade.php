@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-3"></div>
+
 <div class="container mx-auto">
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
@@ -97,49 +100,55 @@
 </div>
 
 <!-- Modal Tambah Supervisor -->
-<div id="tambahModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden my-8">
-        <div class="bg-brand-blue p-4 flex justify-between items-center text-white">
-            <h3 class="font-bold uppercase tracking-wider">Tambah Supervisor Baru</h3>
-            <button onclick="closeTambahModal()" class="hover:rotate-90 transition-transform">
+<div id="tambahModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 modal-content max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Tambah Supervisor Baru</h2>
+                <p class="text-sm text-gray-500 mt-1">Buat akun supervisor baru untuk sistem</p>
+            </div>
+            <button onclick="closeTambahModal()" class="text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
-        <form id="formTambah" class="p-6 space-y-4">
+        <form id="formTambah" class="p-6">
             @csrf
             
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Email *</label>
-                <input type="email" name="email" placeholder="Contoh: supervisor@company.com" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none" required>
-                <span class="error-email text-xs text-brand-red hidden"></span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Email *</label>
+                    <input type="email" name="email" placeholder="supervisor@company.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required>
+                    <span class="error-email text-sm text-brand-red hidden mt-2 block"></span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Password *</label>
+                    <input type="password" name="password" placeholder="Minimal 8 karakter" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required>
+                    <span class="error-password text-sm text-brand-red hidden mt-2 block"></span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Konfirmasi Password *</label>
+                    <input type="password" name="password_confirmation" placeholder="Ulangi password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required>
+                    <span class="error-password_confirmation text-sm text-brand-red hidden mt-2 block"></span>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Nama Bagian *</label>
+                    <input type="text" name="nama_bagian" placeholder="Contoh: IT Production, Human Resources" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required>
+                    <span class="error-nama_bagian text-sm text-brand-red hidden mt-2 block"></span>
+                    <p class="text-xs text-gray-500 mt-2">Satu supervisor hanya menangani satu bagian</p>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Password *</label>
-                <input type="password" name="password" placeholder="Minimal 8 karakter" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none" required>
-                <span class="error-password text-xs text-brand-red hidden"></span>
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Konfirmasi Password *</label>
-                <input type="password" name="password_confirmation" placeholder="Ulangi password" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none" required>
-                <span class="error-password_confirmation text-xs text-brand-red hidden"></span>
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Nama Bagian *</label>
-                <input type="text" name="nama_bagian" placeholder="Contoh: IT Production, Human Resources" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none" required>
-                <span class="error-nama_bagian text-xs text-brand-red hidden"></span>
-                <p class="text-xs text-gray-500 mt-1">Satu supervisor hanya menangani satu bagian</p>
-            </div>
-
-            <div class="flex gap-3 pt-4">
-                <button type="submit" class="flex-1 bg-brand-blue hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                    Simpan
-                </button>
-                <button type="button" onclick="closeTambahModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">
+            <div class="flex gap-3 justify-end pt-6 border-t border-gray-200">
+                <button type="button" onclick="closeTambahModal()" class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm">
                     Batal
+                </button>
+                <button type="submit" class="px-6 py-2.5 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Simpan</span>
                 </button>
             </div>
         </form>
@@ -147,50 +156,56 @@
 </div>
 
 <!-- Modal Edit Supervisor -->
-<div id="editModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden my-8">
-        <div class="bg-brand-blue p-4 flex justify-between items-center text-white">
-            <h3 class="font-bold uppercase tracking-wider">Edit Supervisor</h3>
-            <button onclick="closeEditModal()" class="hover:rotate-90 transition-transform">
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 modal-content max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Edit Supervisor</h2>
+                <p class="text-sm text-gray-500 mt-1">Perbarui informasi akun supervisor</p>
+            </div>
+            <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
-        <form id="formEdit" class="p-6 space-y-4">
+        <form id="formEdit" class="p-6">
             @csrf
             @method('PUT')
             
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Email *</label>
-                <input type="email" name="email" placeholder="Contoh: supervisor@company.com" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none" required>
-                <span class="error-email text-xs text-brand-red hidden"></span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Email *</label>
+                    <input type="email" name="email" placeholder="supervisor@company.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required>
+                    <span class="error-email text-sm text-brand-red hidden mt-2 block"></span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Password <span class="text-xs text-gray-500 font-normal">(Kosongkan jika tidak ingin mengubah)</span></label>
+                    <input type="password" name="password" placeholder="Minimal 8 karakter" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition">
+                    <span class="error-password text-sm text-brand-red hidden mt-2 block"></span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Konfirmasi Password</label>
+                    <input type="password" name="password_confirmation" placeholder="Ulangi password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition">
+                    <span class="error-password_confirmation text-sm text-brand-red hidden mt-2 block"></span>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Nama Bagian *</label>
+                    <input type="text" name="nama_bagian" placeholder="Contoh: IT Production, Human Resources" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition" required>
+                    <span class="error-nama_bagian text-sm text-brand-red hidden mt-2 block"></span>
+                    <p class="text-xs text-gray-500 mt-2">Satu supervisor hanya menangani satu bagian</p>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Password (Kosongkan jika tidak ingin mengubah)</label>
-                <input type="password" name="password" placeholder="Minimal 8 karakter" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none">
-                <span class="error-password text-xs text-brand-red hidden"></span>
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Konfirmasi Password</label>
-                <input type="password" name="password_confirmation" placeholder="Ulangi password" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none">
-                <span class="error-password_confirmation text-xs text-brand-red hidden"></span>
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Nama Bagian *</label>
-                <input type="text" name="nama_bagian" placeholder="Contoh: IT Production, Human Resources" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-brand-blue outline-none" required>
-                <span class="error-nama_bagian text-xs text-brand-red hidden"></span>
-                <p class="text-xs text-gray-500 mt-1">Satu supervisor hanya menangani satu bagian</p>
-            </div>
-
-            <div class="flex gap-3 pt-4">
-                <button type="submit" class="flex-1 bg-brand-blue hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                    Simpan Perubahan
-                </button>
-                <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">
+            <div class="flex gap-3 justify-end pt-6 border-t border-gray-200">
+                <button type="button" onclick="closeEditModal()" class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm">
                     Batal
+                </button>
+                <button type="submit" class="px-6 py-2.5 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Simpan Perubahan</span>
                 </button>
             </div>
         </form>
@@ -198,7 +213,7 @@
 </div>
 
 <!-- Modal Delete Supervisor -->
-<div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" style="display: none;">
     <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden">
         <div class="bg-brand-red p-4 flex justify-between items-center text-white">
             <h3 class="font-bold uppercase tracking-wider">Hapus Supervisor</h3>
@@ -244,12 +259,14 @@
     // Modal Functions
     function openTambahModal() {
         document.getElementById('tambahModal').classList.remove('hidden');
+        document.getElementById('tambahModal').style.display = 'flex';
         document.getElementById('formTambah').reset();
         clearErrors('formTambah');
     }
 
     function closeTambahModal() {
         document.getElementById('tambahModal').classList.add('hidden');
+        document.getElementById('tambahModal').style.display = 'none';
         document.getElementById('formTambah').reset();
         clearErrors('formTambah');
     }
@@ -262,18 +279,27 @@
                     const user = data.user;
                     editSupervisorId = user.id;
                     
-                    document.querySelector('#formEdit input[name="email"]').value = user.email;
-                    document.querySelector('#formEdit input[name="nama_bagian"]').value = user.bagian?.nama_bagian || '';
+                    document.getElementById('formEdit').querySelector('input[name="email"]').value = user.email || '';
+                    document.getElementById('formEdit').querySelector('input[name="password"]').value = '';
+                    document.getElementById('formEdit').querySelector('input[name="password_confirmation"]').value = '';
+                    document.getElementById('formEdit').querySelector('input[name="nama_bagian"]').value = user.bagian?.nama_bagian || '';
                     
                     document.getElementById('editModal').classList.remove('hidden');
+                    document.getElementById('editModal').style.display = 'flex';
                     clearErrors('formEdit');
+                } else {
+                    showToast(data.message || 'Gagal memuat data', 'error');
                 }
             })
-            .catch(err => console.error('Error:', err));
+            .catch(err => {
+                console.error('Error:', err);
+                showToast('Terjadi kesalahan saat memuat data', 'error');
+            });
     }
 
     function closeEditModal() {
         document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editModal').style.display = 'none';
         document.getElementById('formEdit').reset();
         clearErrors('formEdit');
         editSupervisorId = null;
@@ -282,11 +308,17 @@
     function openDeleteModal(id, name) {
         deleteSupervisorId = id;
         document.getElementById('deleteSupervisorName').textContent = name;
-        document.getElementById('deleteModal').classList.remove('hidden');
+        const modalElement = document.getElementById('deleteModal');
+        modalElement.classList.remove('hidden');
+        modalElement.style.display = 'flex';
     }
 
     function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
+        const modalElement = document.getElementById('deleteModal');
+        if (modalElement) {
+            modalElement.classList.add('hidden');
+            modalElement.style.display = 'none';
+        }
         deleteSupervisorId = null;
     }
 
@@ -318,13 +350,13 @@
             const data = await res.json();
 
             if (data.success) {
-                alert('Supervisor berhasil ditambahkan');
+                showToast('Supervisor berhasil ditambahkan', 'success');
                 closeTambahModal();
-                location.reload();
+                setTimeout(() => location.reload(), 1000);
             } else {
                 showErrors(data.errors || {}, 'formTambah');
                 if (data.message) {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             }
         } catch (error) {
@@ -364,48 +396,57 @@
             const data = await res.json();
 
             if (data.success) {
-                alert('Supervisor berhasil diperbarui');
+                showToast('Supervisor berhasil diperbarui', 'success');
                 closeEditModal();
-                location.reload();
+                setTimeout(() => location.reload(), 1000);
             } else {
                 showErrors(data.errors || {}, 'formEdit');
                 if (data.message) {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan');
+            showToast('Terjadi kesalahan', 'error');
         }
     });
 
     document.getElementById('formDelete').addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        if (!deleteSupervisorId) {
+            showToast('ID supervisor tidak ditemukan', 'error');
+            return;
+        }
+        
         const headers = {
             'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+            'X-Requested-With': 'XMLHttpRequest',
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         };
 
         try {
+            console.log('Deleting supervisor with ID:', deleteSupervisorId);
+            
             const res = await fetch(`/admin/kelolasupervisor/${deleteSupervisorId}/delete`, {
                 method: 'DELETE',
                 headers: headers
             });
 
             const data = await res.json();
+            console.log('Response:', data);
 
             if (data.success) {
-                alert('Supervisor berhasil dihapus');
+                showToast('Supervisor berhasil dihapus', 'success');
                 closeDeleteModal();
-                location.reload();
+                setTimeout(() => location.reload(), 1500);
             } else {
-                alert(data.message || 'Gagal menghapus supervisor');
+                showToast(data.message || 'Gagal menghapus supervisor', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan');
+            showToast('Terjadi kesalahan: ' + error.message, 'error');
         }
     });
 
@@ -428,5 +469,101 @@
             }
         }
     }
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        
+        if (!container) {
+            console.error('Toast container not found!');
+            return;
+        }
+        
+        const toastId = 'toast-' + Date.now();
+        let bgColor = 'bg-green-50 border-green-200';
+        let textColor = 'text-green-800';
+        let icon = '✓';
+        let iconColor = 'text-green-500';
+        
+        if (type === 'error') {
+            bgColor = 'bg-red-50 border-red-200';
+            textColor = 'text-red-800';
+            icon = '✕';
+            iconColor = 'text-red-500';
+        } else if (type === 'warning') {
+            bgColor = 'bg-yellow-50 border-yellow-200';
+            textColor = 'text-yellow-800';
+            icon = '!';
+            iconColor = 'text-yellow-500';
+        } else if (type === 'info') {
+            bgColor = 'bg-blue-50 border-blue-200';
+            textColor = 'text-blue-800';
+            icon = 'i';
+            iconColor = 'text-blue-500';
+        }
+        
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `${bgColor} border rounded-lg p-4 shadow-md flex items-start gap-3 animate-slide-in`;
+        toast.innerHTML = `
+            <div class="flex-shrink-0 font-bold ${iconColor}">${icon}</div>
+            <div class="flex-1 ${textColor} text-sm">${message}</div>
+            ${type !== 'success' ? `<button onclick="removeToast('${toastId}')" class="${textColor} hover:opacity-70 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>` : ''}
+        `;
+        
+        container.appendChild(toast);
+        
+        // Auto-remove success toast after 3 seconds
+        if (type === 'success') {
+            setTimeout(() => {
+                removeToast(toastId);
+            }, 3000);
+        }
+    }
+
+    function removeToast(toastId) {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.remove();
+        }
+    }
+
+    // ==================== TOAST ANIMATIONS ====================
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .animate-slide-out {
+            animation: slideOut 0.3s ease-out;
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 @endsection

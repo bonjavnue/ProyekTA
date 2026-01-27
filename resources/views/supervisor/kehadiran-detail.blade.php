@@ -57,7 +57,7 @@
     
     <!-- Header dengan Back Button -->
     <div class="mb-6 flex items-center gap-4">
-        <!-- <a href="{{ route('kehadiran.index') }}" class="p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-all">
+        <!-- <a href="{{ route('supervisor.kehadiran.index') }}" class="p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-all">
             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
@@ -81,7 +81,7 @@
                    class="px-4 py-2 border border-gray-200 rounded-lg text-sm flex-1 outline-none focus:ring-1 focus:ring-brand-blue">
             
             <button @click="selectAllPresent()" 
-                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-all shadow-sm whitespace-nowrap flex items-center justify-center gap-2">
+                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-all shadow-sm whitespace-nowrap flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
@@ -89,7 +89,7 @@
             </button>
             
             <button @click="resetAllStatus()" 
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-all shadow-sm whitespace-nowrap flex items-center justify-center gap-2">
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium text-sm transition-all shadow-sm whitespace-nowrap flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -99,8 +99,8 @@
 
         <!-- Export Dropdown -->
         <div class="relative group">
-            <button type="button" 
-                    class="px-4 py-2 bg-brand-blue hover:bg-blue-900 text-white rounded-lg font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap">
+            <!-- <button type="button" 
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
                 </svg>
@@ -108,25 +108,25 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                 </svg>
-            </button>
+            </button> -->
             
             <!-- Dropdown Menu -->
             <div class="absolute right-0 mt-0 w-40 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                <a href="{{ route('kehadiran.export-pdf', $jadwal->id_jadwal) }}" 
+                <a href="{{ route('supervisor.kehadiran.export-pdf', $jadwal->id_jadwal) }}" 
                    class="block px-4 py-3 text-gray-700 hover:bg-gray-100 first:rounded-t-lg font-medium text-sm flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
                     Export PDF
                 </a>
-                <a href="{{ route('kehadiran.export-excel', ['id' => $jadwal->id_jadwal, 'format' => 'csv']) }}" 
+                <a href="{{ route('supervisor.kehadiran.export-excel', ['id' => $jadwal->id_jadwal, 'format' => 'csv']) }}" 
                    class="block px-4 py-3 text-gray-700 hover:bg-gray-100 font-medium text-sm border-t border-gray-100 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     Export CSV
                 </a>
-                <a href="{{ route('kehadiran.export-excel', ['id' => $jadwal->id_jadwal, 'format' => 'xls']) }}" 
+                <a href="{{ route('supervisor.kehadiran.export-excel', ['id' => $jadwal->id_jadwal, 'format' => 'xls']) }}" 
                    class="block px-4 py-3 text-gray-700 hover:bg-gray-100 last:rounded-b-lg font-medium text-sm border-t border-gray-100 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -310,7 +310,7 @@ function kehadiranDetailApp() {
                     return;
                 }
 
-                const response = await fetch(`/admin/kehadiran/${this.jadwalId}/${idKaryawan}`, {
+                const response = await fetch(`/supervisor/kehadiran/${this.jadwalId}/${idKaryawan}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

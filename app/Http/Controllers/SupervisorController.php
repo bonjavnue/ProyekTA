@@ -90,8 +90,9 @@ class SupervisorController extends Controller
             return response()->json([
                 'success' => true,
                 'user' => [
-                    'id' => $user->email,
+                    'id' => $user->id,
                     'email' => $user->email,
+                    'name' => $user->name,
                     'bagian' => $bagian ? [
                         'id_bagian' => $bagian->id_bagian,
                         'nama_bagian' => $bagian->nama_bagian

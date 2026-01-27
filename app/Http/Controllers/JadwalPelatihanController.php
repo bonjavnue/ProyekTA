@@ -232,11 +232,30 @@ class JadwalPelatihanController extends Controller
 
     public function destroy($id)
     {
-        $jadwal = JadwalPelatihan::findOrFail($id);
-        $jadwal->JadwalBagian()->delete();
-        $jadwal->delete();
+        try {
+            $jadwal = JadwalPelatihan::findOrFail($id);
+            $jadwal->JadwalBagian()->delete();
+            $jadwal->delete();
 
-        return redirect()->route('penjadwalan.index')->with('success', 'Jadwal pelatihan berhasil dihapus');
+            // Check if it's an AJAX request
+            if (request()->wantsJson() || request()->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Jadwal pelatihan berhasil dihapus'
+                ]);
+            }
+
+            return redirect()->route('penjadwalan.index')->with('success', 'Jadwal pelatihan berhasil dihapus');
+        } catch (\Exception $e) {
+            if (request()->wantsJson() || request()->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus jadwal pelatihan: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->route('penjadwalan.index')->with('error', 'Gagal menghapus jadwal pelatihan');
+        }
     }
 
     public function show($id)

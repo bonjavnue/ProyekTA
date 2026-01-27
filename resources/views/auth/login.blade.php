@@ -10,7 +10,7 @@
             
             <div class="hidden md:block md:w-1/2 text-white pr-12">
                 <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-yellow/20 border border-brand-yellow/30 text-brand-yellow text-xs font-bold mb-6 tracking-widest uppercase">
-                    Admin Portal
+                    Admin dan Supervisor
                 </div>
                 <h1 class="text-5xl font-extrabold leading-tight mb-6">
                     Pengelolan <br> <span class="text-brand-yellow">Pelatihan</span> <br> Karyawan

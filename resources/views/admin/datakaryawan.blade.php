@@ -1,6 +1,33 @@
 @extends('layouts.admin')
 
 @section('content')
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-3 max-w-md"></div>
+
+<!-- Confirm Modal -->
+<div id="confirmModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
+        <h3 id="confirmTitle" class="text-lg font-semibold text-gray-800 mb-2">Konfirmasi</h3>
+        <p id="confirmMessage" class="text-gray-600 mb-6">Apakah Anda yakin?</p>
+        <div class="flex gap-3 justify-end">
+            <button 
+                onclick="closeConfirmModal()" 
+                class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
+            >
+                Batal
+            </button>
+            <button 
+                id="confirmBtn" 
+                onclick="executeConfirmAction()" 
+                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition font-medium text-sm"
+            >
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="container mx-auto">
     
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -181,115 +208,123 @@
 
 <!-- Modal Tambah Karyawan -->
 <div id="tambahKaryawanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full animate-fade-in max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-gradient-to-r from-brand-blue to-blue-900 px-6 py-4 rounded-t-lg">
-            <h2 class="text-xl font-bold text-white">Tambah Karyawan</h2>
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 modal-content max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Tambah Karyawan</h2>
+                <p class="text-sm text-gray-500 mt-1">Isi form di bawah untuk menambah karyawan baru</p>
+            </div>
+            <button onclick="closeTambahModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
         
         <form id="formTambahKaryawan" class="p-6">
             @csrf
             
-            <div class="mb-4">
-                <label for="id_karyawan" class="block text-sm font-medium text-gray-700 mb-2">ID Karyawan *</label>
-                <input 
-                    type="text" 
-                    id="id_karyawan" 
-                    name="id_karyawan" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="Masukkan ID Karyawan"
-                    required
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-            
-            <div class="mb-4">
-                <label for="nik" class="block text-sm font-medium text-gray-700 mb-2">NIK *</label>
-                <input 
-                    type="text" 
-                    id="nik" 
-                    name="nik" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="Masukkan NIK"
-                    required
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="mb-4">
-                <label for="nama_karyawan" class="block text-sm font-medium text-gray-700 mb-2">Nama Karyawan *</label>
-                <input 
-                    type="text" 
-                    id="nama_karyawan" 
-                    name="nama_karyawan" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="Masukkan nama karyawan"
-                    required
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="mb-4">
-                <label for="id_bagian" class="block text-sm font-medium text-gray-700 mb-2">Bagian/Divisi *</label>
-                <select 
-                    id="id_bagian" 
-                    name="id_bagian" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    required
-                >
-                    <option value="">-- Pilih Bagian --</option>
-                    @foreach($bagians ?? [] as $bagian)
-                        <option value="{{ $bagian->id_bagian }}">{{ $bagian->nama_bagian }}</option>
-                    @endforeach
-                </select>
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Status Karyawan *</label>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="status_karyawan" value="Tetap" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Tetap</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="status_karyawan" value="Kontrak" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Kontrak</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="status_karyawan" value="Cuti" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Cuti</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="status_karyawan" value="Tidak Aktif" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Tidak Aktif</span>
-                    </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="id_karyawan" class="block text-sm font-semibold text-gray-900 mb-3">ID Karyawan *</label>
+                    <input 
+                        type="text" 
+                        id="id_karyawan" 
+                        name="id_karyawan" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="Contoh: K001"
+                        required
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
                 </div>
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
+                
+                <div>
+                    <label for="nik" class="block text-sm font-semibold text-gray-900 mb-3">NIK *</label>
+                    <input 
+                        type="text" 
+                        id="nik" 
+                        name="nik" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="Contoh: 3201234567890001"
+                        required
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div>
+                    <label for="nama_karyawan" class="block text-sm font-semibold text-gray-900 mb-3">Nama Karyawan *</label>
+                    <input 
+                        type="text" 
+                        id="nama_karyawan" 
+                        name="nama_karyawan" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="Masukkan nama karyawan"
+                        required
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div>
+                    <label for="id_bagian" class="block text-sm font-semibold text-gray-900 mb-3">Bagian/Divisi *</label>
+                    <select 
+                        id="id_bagian" 
+                        name="id_bagian" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        required
+                    >
+                        <option value="">-- Pilih Bagian --</option>
+                        @foreach($bagians ?? [] as $bagian)
+                            <option value="{{ $bagian->id_bagian }}">{{ $bagian->nama_bagian }}</option>
+                        @endforeach
+                    </select>
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Status Karyawan *</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="status_karyawan" value="Tetap" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Tetap</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="status_karyawan" value="Kontrak" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Kontrak</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="status_karyawan" value="Cuti" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Cuti</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="status_karyawan" value="Tidak Aktif" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Tidak Aktif</span>
+                        </label>
+                    </div>
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div>
+                    <label for="no_telepon" class="block text-sm font-semibold text-gray-900 mb-3">No. Telepon</label>
+                    <input 
+                        type="tel" 
+                        id="no_telepon" 
+                        name="no_telepon" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="0812-3456-7890"
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
             </div>
 
-            <div class="mb-6">
-                <label for="no_telepon" class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
-                <input 
-                    type="tel" 
-                    id="no_telepon" 
-                    name="no_telepon" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="0812-3456-7890"
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="flex gap-3 justify-end">
+            <div class="flex gap-3 justify-end pt-6 border-t border-gray-200 mt-6">
                 <button 
                     type="button" 
                     onclick="closeTambahModal()"
-                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                    class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
                 >
                     Batal
                 </button>
                 <button 
                     type="submit" 
-                    class="px-4 py-2 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium flex items-center gap-2"
+                    class="px-6 py-2.5 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
                     id="submitBtn"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -302,9 +337,15 @@
 
 <!-- Modal Edit Karyawan -->
 <div id="editKaryawanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full animate-fade-in max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-gradient-to-r from-brand-blue to-blue-900 px-6 py-4 rounded-t-lg">
-            <h2 class="text-xl font-bold text-white">Edit Karyawan</h2>
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 modal-content max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Edit Karyawan</h2>
+                <p class="text-sm text-gray-500 mt-1">Perbarui informasi karyawan di bawah</p>
+            </div>
+            <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
         
         <form id="formEditKaryawan" class="p-6">
@@ -312,94 +353,109 @@
             
             <input type="hidden" id="edit_id_karyawan" name="edit_id_karyawan">
             
-            <div class="mb-4">
-                <label for="edit_nik" class="block text-sm font-medium text-gray-700 mb-2">NIK *</label>
-                <input 
-                    type="text" 
-                    id="edit_nik" 
-                    name="nik" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="Masukkan NIK"
-                    required
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="mb-4">
-                <label for="edit_nama_karyawan" class="block text-sm font-medium text-gray-700 mb-2">Nama Karyawan *</label>
-                <input 
-                    type="text" 
-                    id="edit_nama_karyawan" 
-                    name="nama_karyawan" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="Masukkan nama karyawan"
-                    required
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="mb-4">
-                <label for="edit_id_bagian" class="block text-sm font-medium text-gray-700 mb-2">Bagian/Divisi *</label>
-                <select 
-                    id="edit_id_bagian" 
-                    name="id_bagian" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    required
-                >
-                    <option value="">-- Pilih Bagian --</option>
-                    @foreach($bagians ?? [] as $bagian)
-                        <option value="{{ $bagian->id_bagian }}">{{ $bagian->nama_bagian }}</option>
-                    @endforeach
-                </select>
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Status Karyawan *</label>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="edit_status_karyawan" value="Tetap" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Tetap</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="edit_status_karyawan" value="Kontrak" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Kontrak</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="edit_status_karyawan" value="Cuti" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Cuti</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="edit_status_karyawan" value="Tidak Aktif" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
-                        <span class="text-gray-700">Tidak Aktif</span>
-                    </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="edit_id_karyawan_display" class="block text-sm font-semibold text-gray-900 mb-3">ID Karyawan *</label>
+                    <input 
+                        type="text" 
+                        id="edit_id_karyawan_display" 
+                        name="id_karyawan" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="Contoh: K001"
+                        required
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
                 </div>
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
+                
+                <div>
+                    <label for="edit_nik" class="block text-sm font-semibold text-gray-900 mb-3">NIK *</label>
+                    <input 
+                        type="text" 
+                        id="edit_nik" 
+                        name="nik" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="Contoh: 3201234567890001"
+                        required
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div>
+                    <label for="edit_nama_karyawan" class="block text-sm font-semibold text-gray-900 mb-3">Nama Karyawan *</label>
+                    <input 
+                        type="text" 
+                        id="edit_nama_karyawan" 
+                        name="nama_karyawan" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="Masukkan nama karyawan"
+                        required
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div>
+                    <label for="edit_id_bagian" class="block text-sm font-semibold text-gray-900 mb-3">Bagian/Divisi *</label>
+                    <select 
+                        id="edit_id_bagian" 
+                        name="id_bagian" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        required
+                    >
+                        <option value="">-- Pilih Bagian --</option>
+                        @foreach($bagians ?? [] as $bagian)
+                            <option value="{{ $bagian->id_bagian }}">{{ $bagian->nama_bagian }}</option>
+                        @endforeach
+                    </select>
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Status Karyawan *</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="edit_status_karyawan" value="Tetap" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Tetap</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="edit_status_karyawan" value="Kontrak" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Kontrak</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="edit_status_karyawan" value="Cuti" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Cuti</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="edit_status_karyawan" value="Tidak Aktif" required class="w-4 h-4 text-brand-blue focus:ring-brand-blue">
+                            <span class="text-gray-700 text-sm">Tidak Aktif</span>
+                        </label>
+                    </div>
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
+
+                <div>
+                    <label for="edit_no_telepon" class="block text-sm font-semibold text-gray-900 mb-3">No. Telepon</label>
+                    <input 
+                        type="tel" 
+                        id="edit_no_telepon" 
+                        name="no_telepon" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
+                        placeholder="0812-3456-7890"
+                    >
+                    <span class="error-message text-red-500 text-sm mt-2 hidden"></span>
+                </div>
             </div>
 
-            <div class="mb-6">
-                <label for="edit_no_telepon" class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
-                <input 
-                    type="tel" 
-                    id="edit_no_telepon" 
-                    name="no_telepon" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                    placeholder="0812-3456-7890"
-                >
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <div class="flex gap-3 justify-end">
+            <div class="flex gap-3 justify-end pt-6 border-t border-gray-200 mt-6">
                 <button 
                     type="button" 
                     onclick="closeEditModal()"
-                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                    class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
                 >
                     Batal
                 </button>
                 <button 
                     type="submit" 
-                    class="px-4 py-2 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium flex items-center gap-2"
+                    class="px-6 py-2.5 bg-brand-blue hover:bg-blue-900 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
                     id="editSubmitBtn"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -412,51 +468,59 @@
 
 <!-- Modal Detail Karyawan -->
 <div id="detailKaryawanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4">
-        <div class="p-6 border-b border-gray-200">
-            <h2 class="text-lg font-bold text-gray-800">Detail Karyawan</h2>
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 modal-content max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Detail Karyawan</h2>
+                <p class="text-sm text-gray-500 mt-1">Informasi lengkap karyawan</p>
+            </div>
+            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
         
-        <div class="p-6 space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">ID Karyawan</label>
-                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-800 font-semibold" id="detail_id_karyawan">-</p>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">ID Karyawan</label>
+                    <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 font-semibold" id="detail_id_karyawan">-</p>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">NIK</label>
-                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-800 font-semibold" id="detail_nik">-</p>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">NIK</label>
+                    <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 font-semibold" id="detail_nik">-</p>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Karyawan</label>
-                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-800 font-semibold" id="detail_nama_karyawan">-</p>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Nama Karyawan</label>
+                    <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 font-semibold" id="detail_nama_karyawan">-</p>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Bagian/Divisi</label>
-                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-800" id="detail_bagian">-</p>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Bagian/Divisi</label>
+                    <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-gray-800" id="detail_bagian">-</p>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-800" id="detail_status">-</p>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">No. Telepon</label>
+                    <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-gray-800" id="detail_no_telepon">-</p>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
-                <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-800" id="detail_no_telepon">-</p>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">Status</label>
+                    <div class="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-gray-800" id="detail_status">-</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -465,7 +529,7 @@
             <button 
                 type="button" 
                 onclick="closeDetailModal()"
-                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium text-sm"
+                class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
             >
                 Tutup
             </button>
@@ -476,8 +540,8 @@
 <!-- Modal Konfirmasi Hapus -->
 <div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-sm w-full animate-fade-in">
-        <div class="bg-red-50 px-6 py-4 border-b border-red-200 rounded-t-lg">
-            <h2 class="text-lg font-bold text-red-900">Hapus Karyawan</h2>
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+            <h2 class="text-lg font-bold text-black-900">Hapus Karyawan</h2>
         </div>
         
         <div class="p-6">
@@ -489,7 +553,7 @@
             </p>
             <p class="text-sm text-gray-600 mb-6">
                 <svg class="w-5 h-5 inline text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                Tindakan ini tidak dapat dibatalkan.
+                Data yang dihapus tidak dapat dipulihkan
             </p>
 
             <div class="flex gap-3 justify-end">
@@ -533,53 +597,90 @@
 
 <!-- Modal Import Excel -->
 <div id="importExcelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full animate-fade-in">
-        <div class="sticky top-0 bg-gradient-to-r from-green-600 to-green-900 px-6 py-4 rounded-t-lg">
-            <h2 class="text-xl font-bold text-white">Import Karyawan dari Excel</h2>
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 modal-content max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Import Karyawan</h2>
+                <p class="text-sm text-gray-500 mt-1">Upload file Excel/CSV untuk menambah multiple data karyawan</p>
+            </div>
+            <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
         
         <form id="formImportExcel" class="p-6">
             @csrf
             
-            <div class="mb-4">
-                <label for="excel_file" class="block text-sm font-medium text-gray-700 mb-2">File Excel/CSV *</label>
-                <input 
-                    type="file" 
-                    id="excel_file" 
-                    name="excel_file" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
-                    accept=".xlsx,.xls,.csv"
-                    required
-                >
-                <p class="text-xs text-gray-500 mt-2">Format: CSV, XLS, atau XLSX (Max 5MB)</p>
-                <p class="text-xs text-gray-600 mt-2"><strong>Format CSV:</strong> id_karyawan, nik, nama_karyawan, id_bagian, status_karyawan, no_telepon</p>
-                <!-- <p class="text-xs text-orange-600 mt-2"><strong>📝 Catatan:</strong></p>
-                <ul class="text-xs text-orange-600 list-disc list-inside">
-                    <li>Format CSV dan XLSX didukung penuh</li>
-                    <li>Format XLS: Convert ke CSV atau XLSX terlebih dahulu</li>
-                    <li>Pastikan file memiliki extension yang benar (.csv, .xls, atau .xlsx)</li>
-                </ul> -->
-                <span class="error-message text-red-500 text-sm mt-1 hidden"></span>
+            <div class="mb-6">
+                <label for="excel_file" class="block text-sm font-semibold text-gray-900 mb-3">File Excel/CSV *</label>
+                <div class="relative">
+                    <input 
+                        type="file" 
+                        id="excel_file" 
+                        name="excel_file" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                        accept=".xlsx,.xls,.csv"
+                        required
+                    >
+                </div>
+                <p class="text-sm text-gray-600 mt-3"><strong>Format yang didukung:</strong> CSV, XLS, atau XLSX (Max 5MB)</p>
+                <p class="text-sm text-gray-600 mt-2"><strong>Kolom CSV yang diperlukan:</strong></p>
+                <div class="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-700">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-brand-blue text-white rounded">1</span>
+                            <span>id_karyawan</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-brand-blue text-white rounded">2</span>
+                            <span>nik</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-brand-blue text-white rounded">3</span>
+                            <span>nama_karyawan</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-brand-blue text-white rounded">4</span>
+                            <span>id_bagian</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-brand-blue text-white rounded">5</span>
+                            <span>status_karyawan</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-brand-blue text-white rounded">6</span>
+                            <span>no_telepon</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="error-message text-red-500 text-sm mt-3 hidden"></span>
             </div>
 
-            <!-- <div class="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p class="text-xs text-blue-800">
-                    <strong>Catatan:</strong> Pastikan file CSV Anda memiliki header sesuai format di atas. 
-                    <a href="#" class="text-blue-600 underline" onclick="downloadTemplate(event)">Download template CSV</a>
-                </p>
-            </div> -->
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6">
+                <div class="flex gap-3">
+                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2z" clip-rule="evenodd"/></svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-semibold mb-1">Petunjuk Format:</p>
+                        <ul class="list-disc list-inside space-y-1 text-xs">
+                            <li>Status karyawan harus: <code class="bg-blue-100 px-1.5 py-0.5 rounded">Tetap</code>, <code class="bg-blue-100 px-1.5 py-0.5 rounded">Kontrak</code>, <code class="bg-blue-100 px-1.5 py-0.5 rounded">Cuti</code>, atau <code class="bg-blue-100 px-1.5 py-0.5 rounded">Tidak Aktif</code></li>
+                            <!-- <li>id_bagian harus sesuai dengan ID bagian yang ada di sistem</li> -->
+                            <li>Pastikan tidak ada baris kosong di file</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-            <div class="flex gap-3 justify-end">
+            <div class="flex gap-3 justify-end pt-6 border-t border-gray-200">
                 <button 
                     type="button" 
                     onclick="closeImportModal()"
-                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                    class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
                 >
                     Batal
                 </button>
                 <button 
                     type="submit" 
-                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium flex items-center gap-2"
+                    class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
                     id="importSubmitBtn"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -588,7 +689,7 @@
             </div>
         </form>
     </div>
-</div>
+</div>p
 
 <script>
     const tambahModal = document.getElementById('tambahKaryawanModal');
@@ -643,7 +744,9 @@
 
     // === EDIT MODAL ===
     function openEditModal(id, nik, nama, bagian, status, telp) {
-        document.getElementById('edit_id_karyawan').value = id;
+        const oldId = id;
+        document.getElementById('edit_id_karyawan').value = oldId;
+        document.getElementById('edit_id_karyawan_display').value = id;
         document.getElementById('edit_nik').value = nik;
         document.getElementById('edit_nama_karyawan').value = nama;
         document.getElementById('edit_id_bagian').value = bagian;
@@ -714,15 +817,17 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert('Karyawan berhasil dihapus');
+                showToast('Karyawan berhasil dihapus', 'success');
                 closeDeleteModal();
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
-                alert(data.message || 'Gagal menghapus data');
+                showToast(data.message || 'Gagal menghapus data', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus data: ' + error.message);
+            showToast('Terjadi kesalahan saat menghapus data: ' + error.message, 'error');
         } finally {
             deleteConfirmBtn.disabled = false;
             deleteConfirmBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> <span>Ya, Hapus</span>';
@@ -770,9 +875,11 @@
             const data = await response.json();
 
             if (response.ok) {
-                alert('Karyawan berhasil ditambahkan');
+                showToast('Karyawan berhasil ditambahkan', 'success');
                 closeTambahModal();
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 if (data.errors) {
                     Object.keys(data.errors).forEach(field => {
@@ -783,12 +890,12 @@
                         }
                     });
                 } else {
-                    alert(data.message || 'Gagal menyimpan data');
+                    showToast(data.message || 'Gagal menyimpan data', 'error');
                 }
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data');
+            showToast('Terjadi kesalahan saat menyimpan data', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>Simpan</span>';
@@ -807,6 +914,7 @@
 
         const csrfToken = document.querySelector('input[name="_token"]').value;
         const data = {
+            'id_karyawan': document.getElementById('edit_id_karyawan_display').value,
             'nik': document.getElementById('edit_nik').value,
             'nama_karyawan': document.getElementById('edit_nama_karyawan').value,
             'id_bagian': document.getElementById('edit_id_bagian').value,
@@ -831,9 +939,11 @@
             const respData = await response.json();
 
             if (response.ok && respData.success) {
-                alert('Karyawan berhasil diperbarui');
+                showToast('Karyawan berhasil diperbarui', 'success');
                 closeEditModal();
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 if (respData.errors) {
                     Object.keys(respData.errors).forEach(field => {
@@ -848,13 +958,13 @@
                         }
                     });
                 } else {
-                    alert(respData.message || 'Gagal menyimpan perubahan');
+                    showToast(respData.message || 'Gagal menyimpan perubahan', 'error');
                 }
                 console.error('Response data:', respData);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan perubahan: ' + error.message);
+            showToast('Terjadi kesalahan saat menyimpan perubahan: ' + error.message, 'error');
         } finally {
             editSubmitBtn.disabled = false;
             editSubmitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>Simpan Perubahan</span>';
@@ -1150,7 +1260,7 @@
     function deleteSelectedItems() {
         const selected = getSelectedItems();
         if (selected.length === 0) {
-            alert('Tidak ada item yang dipilih');
+            showToast('Tidak ada item yang dipilih', 'warning');
             return;
         }
         
@@ -1158,9 +1268,11 @@
             ? selected.slice(0, 5).map(item => item.nama).join(', ') + ` ... (+${selected.length - 5} lainnya)`
             : selected.map(item => item.nama).join(', ');
         
-        if (confirm(`Yakin hapus ${selected.length} karyawan?\n\n${itemsPreview}`)) {
-            bulkDeleteItems(selected.map(item => item.id));
-        }
+        showConfirmModal(
+            'Hapus Karyawan?',
+            `Yakin hapus ${selected.length} karyawan?\n\n${itemsPreview}`,
+            () => bulkDeleteItems(selected.map(item => item.id))
+        );
     }
 
     async function bulkDeleteItems(ids) {
@@ -1179,11 +1291,13 @@
                 });
             }
             
-            alert(`${ids.length} karyawan berhasil dihapus`);
-            location.reload();
+            showToast(`${ids.length} karyawan berhasil dihapus`, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus data: ' + error.message);
+            showToast('Terjadi kesalahan saat menghapus data: ' + error.message, 'error');
         }
     }
 
@@ -1196,7 +1310,7 @@
         
         // Validasi file dipilih
         if (!file) {
-            alert('Pilih file terlebih dahulu');
+            showToast('Pilih file terlebih dahulu', 'warning');
             return;
         }
         
@@ -1206,14 +1320,14 @@
         const fileExtension = fileName.split('.').pop();
         
         if (!allowedExtensions.includes(fileExtension)) {
-            alert(`Format file tidak valid!\n\nFile: ${file.name}\nExtension: .${fileExtension}\n\nGunakan file dengan extension: .csv, .xls, atau .xlsx`);
+            showToast(`Format file tidak valid! Gunakan .csv, .xls, atau .xlsx`, 'error');
             return;
         }
         
         // Validasi ukuran file (5MB = 5120KB)
         const maxSize = 5 * 1024 * 1024; // 5MB in bytes
         if (file.size > maxSize) {
-            alert(`Ukuran file terlalu besar!\n\nUkuran: ${(file.size / 1024 / 1024).toFixed(2)}MB\nMaksimal: 5MB`);
+            showToast(`Ukuran file terlalu besar! Maksimal 5MB`, 'error');
             return;
         }
 
@@ -1237,25 +1351,156 @@
             if (response.ok && data.success) {
                 let message = data.message;
                 if (data.error_count > 0) {
-                    message += `\n\nPeringatan: ${data.error_count} baris gagal diimpor:\n${data.errors.slice(0, 5).join('\n')}`;
-                    if (data.error_count > 5) {
-                        message += `\n... dan ${data.error_count - 5} error lainnya`;
-                    }
+                    message += ` (${data.error_count} baris gagal)`;
                 }
-                alert(message);
+                showToast(message, 'success');
                 closeImportModal();
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
-                alert(data.message || 'Gagal mengimpor file');
+                showToast(data.message || 'Gagal mengimpor file', 'error');
                 console.error('Response:', data);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat mengimpor file: ' + error.message);
+            showToast('Terjadi kesalahan saat mengimpor file: ' + error.message, 'error');
         } finally {
             importSubmitBtn.disabled = false;
             importSubmitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> <span>Import</span>';
         }
     });
+
+    // ==================== TOAST FUNCTIONS ====================
+    
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        
+        const toastId = 'toast-' + Date.now();
+        let bgColor = 'bg-green-50 border-green-200';
+        let textColor = 'text-green-800';
+        let icon = '✓';
+        let iconColor = 'text-green-500';
+        
+        if (type === 'error') {
+            bgColor = 'bg-red-50 border-red-200';
+            textColor = 'text-red-800';
+            icon = '✕';
+            iconColor = 'text-red-500';
+        } else if (type === 'warning') {
+            bgColor = 'bg-yellow-50 border-yellow-200';
+            textColor = 'text-yellow-800';
+            icon = '!';
+            iconColor = 'text-yellow-500';
+        } else if (type === 'info') {
+            bgColor = 'bg-blue-50 border-blue-200';
+            textColor = 'text-blue-800';
+            icon = 'i';
+            iconColor = 'text-blue-500';
+        }
+        
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `${bgColor} border rounded-lg p-4 shadow-md flex items-start gap-3 animate-slide-in`;
+        toast.innerHTML = `
+            <div class="flex-shrink-0 font-bold ${iconColor}">${icon}</div>
+            <div class="flex-1 ${textColor} text-sm">${message}</div>
+            ${type !== 'success' ? `<button onclick="removeToast('${toastId}')" class="${textColor} hover:opacity-70 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>` : ''}
+        `;
+        
+        container.appendChild(toast);
+        
+        // Auto-remove success toast after 3 seconds
+        if (type === 'success') {
+            setTimeout(() => {
+                removeToast(toastId);
+            }, 3000);
+        }
+    }
+    
+    function removeToast(toastId) {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.classList.add('animate-slide-out');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }
+    }
+    
+    // ==================== CONFIRM MODAL FUNCTIONS ====================
+    
+    let confirmCallback = null;
+    
+    function showConfirmModal(title, message, callback) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmModal').classList.remove('hidden');
+        confirmCallback = callback;
+    }
+    
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+        confirmCallback = null;
+    }
+    
+    function executeConfirmAction() {
+        if (confirmCallback) {
+            confirmCallback();
+        }
+        closeConfirmModal();
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeConfirmModal();
+        }
+    });
+    
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !document.getElementById('confirmModal').classList.contains('hidden')) {
+            closeConfirmModal();
+        }
+    });
+    
+    // ==================== ADD STYLE FOR ANIMATIONS ====================
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .animate-slide-out {
+            animation: slideOut 0.3s ease-out;
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 @endsection

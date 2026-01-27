@@ -13,7 +13,7 @@ class PresensiController extends Controller
     // ========== LOKASI KANTOR YANG FIXED ==========
     private const OFFICE_LATITUDE = -7.048357;
     private const OFFICE_LONGITUDE = 110.437872;
-    private const OFFICE_RADIUS = 700; // meter
+    private const OFFICE_RADIUS = 10000; // meter
     private const OFFICE_NAME = "Kantor Pusat";
     // =============================================
     // public function getJadwal($id_jadwal)

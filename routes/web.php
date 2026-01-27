@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\JadwalPelatihanController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\KehadiranController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
@@ -34,20 +35,17 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 Route::middleware(['auth', 'role:admin,supervisor'])->group(function () {
     
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::prefix('admin')->group(function () {
-        // Kehadiran routes (Admin & Supervisor)
-        Route::middleware('supervisor.scope')->group(function () {
-            Route::get('/kehadiran', [KehadiranController::class, 'index'])->name('kehadiran.index');
-            Route::get('/kehadiran/{id}', [KehadiranController::class, 'show'])->name('kehadiran.show');
-            Route::put('/kehadiran/{id}/{id_karyawan}', [KehadiranController::class, 'updateStatus'])->name('kehadiran.updateStatus');
-            Route::get('/kehadiran-export', [KehadiranController::class, 'export'])->name('kehadiran.export');
-            Route::get('/kehadiran/{id}/export-pdf', [KehadiranController::class, 'exportPdf'])->name('kehadiran.export-pdf');
-            Route::get('/kehadiran/{id}/export-excel', [KehadiranController::class, 'exportExcel'])->name('kehadiran.export-excel');
-        });
+    // ADMIN ROUTES
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
+        // Kehadiran routes (Admin only)
+        Route::get('/kehadiran', [KehadiranController::class, 'index'])->name('kehadiran.index');
+        Route::get('/kehadiran/{id}', [KehadiranController::class, 'show'])->name('kehadiran.show');
+        Route::put('/kehadiran/{id}/{id_karyawan}', [KehadiranController::class, 'updateStatus'])->name('kehadiran.updateStatus');
+        Route::get('/kehadiran-export', [KehadiranController::class, 'export'])->name('kehadiran.export');
+        Route::get('/kehadiran/{id}/export-pdf', [KehadiranController::class, 'exportPdf'])->name('kehadiran.export-pdf');
+        Route::get('/kehadiran/{id}/export-excel', [KehadiranController::class, 'exportExcel'])->name('kehadiran.export-excel');
 
         // Jadwal Pelatihan Management (Admin only)
         Route::middleware('role:admin')->group(function () {
@@ -55,18 +53,20 @@ Route::middleware(['auth', 'role:admin,supervisor'])->group(function () {
             Route::get('/penjadwalan/create', [JadwalPelatihanController::class, 'create'])->name('penjadwalan.create');
             Route::post('/penjadwalan', [JadwalPelatihanController::class, 'store'])->name('penjadwalan.store');
             Route::get('/penjadwalan/{id}/edit', [JadwalPelatihanController::class, 'edit'])->name('penjadwalan.edit');
+            Route::get('/penjadwalan/{id}', [JadwalPelatihanController::class, 'show'])->name('penjadwalan.show');
             Route::put('/penjadwalan/{id}', [JadwalPelatihanController::class, 'update'])->name('penjadwalan.update');
             Route::delete('/penjadwalan/{id}', [JadwalPelatihanController::class, 'destroy'])->name('penjadwalan.destroy');
-            Route::get('/penjadwalan/{id}', [JadwalPelatihanController::class, 'show'])->name('penjadwalan.show');
             Route::post('/penjadwalan/{id}/generate-presensi', [JadwalPelatihanController::class, 'generatePresensi'])->name('penjadwalan.generate-presensi');
             Route::post('/penjadwalan/{id}/extend-presensi', [JadwalPelatihanController::class, 'extendPresensi'])->name('penjadwalan.extend-presensi');
         });
         
-        // Jenis Pelatihan Management
-        Route::get('/jenispelatihan', [JenisPelatihanController::class, 'index'])->name('jenis-pelatihan.index');
-        Route::post('/jenispelatihan/store', [JenisPelatihanController::class, 'store'])->name('jenis-pelatihan.store');
-        Route::post('/jenispelatihan/{jenisPelatihan}/update', [JenisPelatihanController::class, 'update'])->name('jenis-pelatihan.update');
-        Route::post('/jenispelatihan/{jenisPelatihan}/delete', [JenisPelatihanController::class, 'destroy'])->name('jenis-pelatihan.destroy');
+        // Jenis Pelatihan Management (Admin only)
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/jenispelatihan', [JenisPelatihanController::class, 'index'])->name('jenis-pelatihan.index');
+            Route::post('/jenispelatihan/store', [JenisPelatihanController::class, 'store'])->name('jenis-pelatihan.store');
+            Route::post('/jenispelatihan/{jenisPelatihan}/update', [JenisPelatihanController::class, 'update'])->name('jenis-pelatihan.update');
+            Route::post('/jenispelatihan/{jenisPelatihan}/delete', [JenisPelatihanController::class, 'destroy'])->name('jenis-pelatihan.destroy');
+        });
 
         // Data Karyawan Management (Admin only)
         Route::middleware('role:admin')->group(function () {
@@ -96,6 +96,17 @@ Route::middleware(['auth', 'role:admin,supervisor'])->group(function () {
             Route::put('/kelolaadmin/{email}/update', [AdminController::class, 'update'])->name('admin.update');
             Route::delete('/kelolaadmin/{email}/delete', [AdminController::class, 'destroy'])->name('admin.destroy');
         });
+    });
+
+    // SUPERVISOR ROUTES
+    Route::prefix('supervisor')->middleware('role:supervisor')->group(function () {
+        // Kehadiran routes (Supervisor only)
+        Route::get('/kehadiran', [KehadiranController::class, 'index'])->name('supervisor.kehadiran.index');
+        Route::get('/kehadiran/{id}', [KehadiranController::class, 'show'])->name('supervisor.kehadiran.show');
+        Route::put('/kehadiran/{id}/{id_karyawan}', [KehadiranController::class, 'updateStatus'])->name('supervisor.kehadiran.updateStatus');
+        Route::get('/kehadiran-export', [KehadiranController::class, 'export'])->name('supervisor.kehadiran.export');
+        Route::get('/kehadiran/{id}/export-pdf', [KehadiranController::class, 'exportPdf'])->name('supervisor.kehadiran.export-pdf');
+        Route::get('/kehadiran/{id}/export-excel', [KehadiranController::class, 'exportExcel'])->name('supervisor.kehadiran.export-excel');
     });
 });
 

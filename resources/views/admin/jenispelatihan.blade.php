@@ -1,6 +1,33 @@
 @extends('layouts.admin')
 
 @section('content')
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-3 max-w-md"></div>
+
+<!-- Confirm Modal -->
+<div id="confirmModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
+        <h3 id="confirmTitle" class="text-lg font-semibold text-gray-800 mb-2">Konfirmasi</h3>
+        <p id="confirmMessage" class="text-gray-600 mb-6">Apakah Anda yakin?</p>
+        <div class="flex gap-3 justify-end">
+            <button 
+                onclick="closeConfirmModal()" 
+                class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
+            >
+                Batal
+            </button>
+            <button 
+                id="confirmBtn" 
+                onclick="executeConfirmAction()" 
+                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition font-medium text-sm"
+            >
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="container mx-auto">
     
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -85,7 +112,7 @@
                         </td>
                         <td class="px-6 py-3 text-sm font-semibold text-brand-blue">{{ $pelatihan->id_jenis }}</td>
                         <td class="px-6 py-3 text-sm font-medium text-gray-800">{{ $pelatihan->nama_jenis }}</td>
-                        <td class="px-6 py-3 text-sm text-gray-700">{{ $pelatihan->updated_at->format('M d, Y') }}</td>
+                        <td class="px-6 py-3 text-sm text-gray-700">{{ $pelatihan->updated_at->format('d M Y') }}</td>
                         <td class="px-6 py-3 text-center text-sm">
                             <div class="flex items-center justify-center gap-2">
                                 <button 
@@ -638,7 +665,7 @@
     function deleteSelectedItems() {
         const selected = getSelectedItems();
         if (selected.length === 0) {
-            alert('Tidak ada item yang dipilih');
+            showToast('Tidak ada item yang dipilih', 'warning');
             return;
         }
         
@@ -646,9 +673,11 @@
             ? selected.slice(0, 5).map(item => item.name).join(', ') + ` ... (+${selected.length - 5} lainnya)`
             : selected.map(item => item.name).join(', ');
         
-        if (confirm(`Yakin hapus ${selected.length} item?\n\n${itemsPreview}`)) {
-            bulkDeleteItems(selected.map(item => item.id));
-        }
+        showConfirmModal(
+            'Hapus Item?',
+            `Yakin hapus ${selected.length} item?\n\n${itemsPreview}`,
+            () => bulkDeleteItems(selected.map(item => item.id))
+        );
     }
 
     async function bulkDeleteItems(ids) {
@@ -670,11 +699,13 @@
                 });
             }
             
-            alert(`${ids.length} item berhasil dihapus`);
-            location.reload();
+            showToast(`${ids.length} item berhasil dihapus`, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus data');
+            showToast('Terjadi kesalahan saat menghapus data', 'error');
         }
     }
 
@@ -700,9 +731,11 @@
             const data = await response.json();
 
             if (response.ok) {
-                alert('Jenis Pelatihan berhasil ditambahkan');
+                showToast('Jenis Pelatihan berhasil ditambahkan', 'success');
                 closeModal();
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 if (data.errors) {
                     Object.keys(data.errors).forEach(field => {
@@ -713,12 +746,12 @@
                         }
                     });
                 } else {
-                    alert(data.message || 'Gagal menyimpan data');
+                    showToast(data.message || 'Gagal menyimpan data', 'error');
                 }
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data');
+            showToast('Terjadi kesalahan saat menyimpan data', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>Simpan</span>';
@@ -866,9 +899,11 @@
             const data = await response.json();
 
             if (response.ok) {
-                alert('Jenis Pelatihan berhasil diperbarui');
+                showToast('Jenis Pelatihan berhasil diperbarui', 'success');
                 closeEditModal();
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 if (data.errors) {
                     Object.keys(data.errors).forEach(field => {
@@ -883,12 +918,12 @@
                         }
                     });
                 } else {
-                    alert(data.message || 'Gagal menyimpan perubahan');
+                    showToast(data.message || 'Gagal menyimpan perubahan', 'error');
                 }
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan perubahan');
+            showToast('Terjadi kesalahan saat menyimpan perubahan', 'error');
         } finally {
             editSubmitBtn.disabled = false;
             editSubmitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>Simpan Perubahan</span>';
@@ -899,9 +934,9 @@
 <!-- Modal Konfirmasi Hapus -->
 <div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-container">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 modal-content">
-        <div class="p-6 border-b border-red-200">
-            <h2 class="text-lg font-bold text-red-900">Hapus Jenis Pelatihan</h2>
-            <p class="text-sm text-red-700 mt-1">Tindakan ini tidak dapat dibatalkan</p>
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-bold text-black-900">Hapus Jenis Pelatihan</h2>
+            <!-- <p class="text-sm text-red-700 mt-1">Tindakan ini tidak dapat dibatalkan</p> -->
         </div>
         
         <div class="p-6 space-y-4">
@@ -1001,15 +1036,17 @@
             const data = await response.json();
 
             if (response.ok) {
-                alert('Jenis Pelatihan berhasil dihapus');
+                showToast('Jenis Pelatihan berhasil dihapus', 'success');
                 closeDeleteModal();
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
-                alert(data.message || 'Gagal menghapus data');
+                showToast(data.message || 'Gagal menghapus data', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus data');
+            showToast('Terjadi kesalahan saat menghapus data', 'error');
         } finally {
             deleteConfirmBtn.disabled = false;
             deleteConfirmBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> <span>Ya, Hapus</span>';
@@ -1103,11 +1140,136 @@
         }
     });
 
-    // Close modal saat klik di luar form
-    // detailModal.addEventListener('click', function(e) {
-    //     if (e.target === detailModal) {
-    //         closeDetailModal();
-    //     }
-    // });
+    // ==================== TOAST FUNCTIONS ====================
+    
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        
+        const toastId = 'toast-' + Date.now();
+        let bgColor = 'bg-green-50 border-green-200';
+        let textColor = 'text-green-800';
+        let icon = '✓';
+        let iconColor = 'text-green-500';
+        
+        if (type === 'error') {
+            bgColor = 'bg-red-50 border-red-200';
+            textColor = 'text-red-800';
+            icon = '✕';
+            iconColor = 'text-red-500';
+        } else if (type === 'warning') {
+            bgColor = 'bg-yellow-50 border-yellow-200';
+            textColor = 'text-yellow-800';
+            icon = '!';
+            iconColor = 'text-yellow-500';
+        } else if (type === 'info') {
+            bgColor = 'bg-blue-50 border-blue-200';
+            textColor = 'text-blue-800';
+            icon = 'i';
+            iconColor = 'text-blue-500';
+        }
+        
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `${bgColor} border rounded-lg p-4 shadow-md flex items-start gap-3 animate-slide-in`;
+        toast.innerHTML = `
+            <div class="flex-shrink-0 font-bold ${iconColor}">${icon}</div>
+            <div class="flex-1 ${textColor} text-sm">${message}</div>
+            ${type !== 'success' ? `<button onclick="removeToast('${toastId}')" class="${textColor} hover:opacity-70 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>` : ''}
+        `;
+        
+        container.appendChild(toast);
+        
+        // Auto-remove success toast after 3 seconds
+        if (type === 'success') {
+            setTimeout(() => {
+                removeToast(toastId);
+            }, 3000);
+        }
+    }
+    
+    function removeToast(toastId) {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.classList.add('animate-slide-out');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }
+    }
+    
+    // ==================== CONFIRM MODAL FUNCTIONS ====================
+    
+    let confirmCallback = null;
+    
+    function showConfirmModal(title, message, callback) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmModal').classList.remove('hidden');
+        confirmCallback = callback;
+    }
+    
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+        confirmCallback = null;
+    }
+    
+    function executeConfirmAction() {
+        if (confirmCallback) {
+            confirmCallback();
+        }
+        closeConfirmModal();
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeConfirmModal();
+        }
+    });
+    
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !document.getElementById('confirmModal').classList.contains('hidden')) {
+            closeConfirmModal();
+        }
+    });
+    
+    // ==================== ADD STYLE FOR ANIMATIONS ====================
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .animate-slide-out {
+            animation: slideOut 0.3s ease-out;
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 @endsection

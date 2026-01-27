@@ -57,7 +57,6 @@ class JenisPelatihanController extends Controller
         if ($search) {
             $query->search($search);
         }
-
         // Apply sorting dengan parameter dinamis
         $query->orderBy($sortBy, $sortOrder);
 

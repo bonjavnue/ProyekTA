@@ -1,6 +1,76 @@
 @extends('layouts.admin')
 
 @section('content')
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-3 max-w-md"></div>
+
+<!-- Delete Confirm Modal -->
+<div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-sm w-full animate-fade-in">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+            <h2 class="text-lg font-bold text-black-900">Hapus Jadwal Pelatihan</h2>
+        </div>
+        
+        <div class="p-6">
+            <p class="text-gray-700 mb-2">
+                Apakah Anda yakin ingin menghapus jadwal berikut?
+            </p>
+            <div class="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p class="text-lg font-semibold text-gray-900 mb-2">
+                    <span id="deleteItemName"></span>
+                </p>
+                <p class="text-sm text-gray-600">
+                    <span id="deleteItemDate"></span>
+                </p>
+                <p class="text-sm text-gray-600">
+                    <span id="deleteItemTime"></span>
+                </p>
+            </div>
+            <p class="text-sm text-gray-600 mb-6">
+                <svg class="w-5 h-5 inline text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                Data yang dihapus tidak dapat dipulihkan
+            </p>
+
+            <div class="flex gap-3 justify-end">
+                <button 
+                    type="button" 
+                    onclick="closeDeleteModal()"
+                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                >
+                    Batal
+                </button>
+                <button 
+                    type="button" 
+                    onclick="confirmDeleteJadwal()"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-medium flex items-center gap-2"
+                    id="deleteConfirmBtn"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span>Ya, Hapus</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+</style>
+
 <div x-data="penjadwalanSearch()" class="container mx-auto">
     
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -15,13 +85,11 @@
     </div>
 
     @if (session('success'))
-        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                <span class="text-green-700">{{ session('success') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-green-600 hover:text-green-800">✕</button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast('{{ session('success') }}', 'success');
+            });
+        </script>
     @endif
 
     <!-- Filters -->
@@ -117,7 +185,7 @@
                                     <a :href="`/admin/penjadwalan/${jadwal.id_jadwal}/edit`" class="text-amber-600 hover:text-amber-800 font-medium" title="Edit">
                                         <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </a>
-                                    <button @click="deleteConfirm(jadwal.id_jadwal)" class="text-red-600 hover:text-red-800 font-medium" title="Hapus">
+                                    <button @click="deleteConfirm(jadwal)" class="text-red-600 hover:text-red-800 font-medium" title="Hapus">
                                         <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                     <form :id="'delete-form-' + jadwal.id_jadwal" :action="`/admin/penjadwalan/${jadwal.id_jadwal}`" method="POST" style="display:none;">
@@ -298,12 +366,177 @@ function penjadwalanSearch() {
             return 'bg-gray-100 text-gray-700';
         },
         
-        deleteConfirm(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
-                document.getElementById('delete-form-' + id).submit();
-            }
+        deleteConfirm(jadwal) {
+            const date = new Date(jadwal.tanggal_pelaksanaan);
+            const formattedDate = date.toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+            deleteIdJadwal = jadwal.id_jadwal;
+            document.getElementById('deleteItemName').textContent = jadwal.nama_jenis;
+            document.getElementById('deleteItemDate').textContent = formattedDate;
+            document.getElementById('deleteItemTime').textContent = `Jam: ${jadwal.jam_mulai} - ${jadwal.jam_selesai}`;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
     };
 }
+
+// ==================== TOAST FUNCTIONS ====================
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    
+    const toastId = 'toast-' + Date.now();
+    let bgColor = 'bg-green-50 border-green-200';
+    let textColor = 'text-green-800';
+    let icon = '✓';
+    let iconColor = 'text-green-500';
+    
+    if (type === 'error') {
+        bgColor = 'bg-red-50 border-red-200';
+        textColor = 'text-red-800';
+        icon = '✕';
+        iconColor = 'text-red-500';
+    } else if (type === 'warning') {
+        bgColor = 'bg-yellow-50 border-yellow-200';
+        textColor = 'text-yellow-800';
+        icon = '!';
+        iconColor = 'text-yellow-500';
+    } else if (type === 'info') {
+        bgColor = 'bg-blue-50 border-blue-200';
+        textColor = 'text-blue-800';
+        icon = 'i';
+        iconColor = 'text-blue-500';
+    }
+    
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = `${bgColor} border rounded-lg p-4 shadow-md flex items-start gap-3 animate-slide-in`;
+    toast.innerHTML = `
+        <div class="flex-shrink-0 font-bold ${iconColor}">${icon}</div>
+        <div class="flex-1 ${textColor} text-sm">${message}</div>
+        ${type !== 'success' ? `<button onclick="removeToast('${toastId}')" class="${textColor} hover:opacity-70 transition">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>` : ''}
+    `;
+    
+    container.appendChild(toast);
+    
+    // Auto-remove success toast after 3 seconds
+    if (type === 'success') {
+        setTimeout(() => {
+            removeToast(toastId);
+        }, 3000);
+    }
+}
+
+function removeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.add('animate-slide-out');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }
+}
+
+// ==================== DELETE MODAL FUNCTIONS ====================
+
+let deleteIdJadwal = null;
+
+function closeDeleteModal() {
+    document.getElementById('deleteConfirmModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    deleteIdJadwal = null;
+}
+
+async function confirmDeleteJadwal() {
+    const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+    deleteConfirmBtn.disabled = true;
+    deleteConfirmBtn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Menghapus...</span>';
+
+    try {
+        const csrfToken = document.querySelector('input[name="_token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.content;
+        
+        const response = await fetch(`/admin/penjadwalan/${deleteIdJadwal}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            showToast('Jadwal berhasil dihapus', 'success');
+            closeDeleteModal();
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showToast(data.message || 'Gagal menghapus jadwal', 'error');
+            deleteConfirmBtn.disabled = false;
+            deleteConfirmBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> <span>Ya, Hapus</span>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Terjadi kesalahan saat menghapus jadwal: ' + error.message, 'error');
+        deleteConfirmBtn.disabled = false;
+        deleteConfirmBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> <span>Ya, Hapus</span>';
+    }
+}
+
+// Close modal with ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (!document.getElementById('deleteConfirmModal').classList.contains('hidden')) {
+            closeDeleteModal();
+        }
+    }
+});
+
+// Close modal when clicking outside
+document.getElementById('deleteConfirmModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+
+// ==================== ADD STYLE FOR ANIMATIONS ====================
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+    
+    .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    .animate-slide-out {
+        animation: slideOut 0.3s ease-out;
+    }
+`;
+document.head.appendChild(style);
 </script>
 @endsection
